@@ -462,12 +462,17 @@ classdef AccelDemo < handle
                     end
                 end
 
-                % ---- Spectrogram column ----
-                specCol = magv(:);
+                % ---- Spectrogram columns ----
+                % Advance by as many columns as the received chunk represents so
+                % the waterfall stays in sync with wall clock even when rendering
+                % causes callbacks to fire less frequently than ChunkSec.
+                specCol  = magv(:);
+                colsToAdd = max(1, round(n / (app.SampleRate * app.ChunkSec)));
                 if isempty(app.SpecBuffer) || size(app.SpecBuffer,1) ~= numel(specCol)
                     app.SpecBuffer = repmat(specCol, 1, app.NumSpecCols) * 1e-12;
                 end
-                app.SpecBuffer = [app.SpecBuffer(:, 2:end), specCol];
+                newCols = repmat(specCol, 1, colsToAdd);
+                app.SpecBuffer = [app.SpecBuffer(:, colsToAdd+1:end), newCols];
 
                 % ---- Set scalar values before drawnow so they flush together ----
                 app.ShakeGauge.Value = min(rmsVal, 5);
@@ -529,13 +534,25 @@ classdef AccelDemo < handle
 
         function renderEqualizer(app, bandEnergy)
             ax = app.EqualizerAxes;
+            % Keep only bands that overlap [FreqMin, FreqMax]
             nB = numel(bandEnergy);
-            % Convert energy to RMS amplitude per band for linear display
-            ampPerBand = sqrt(max(bandEnergy, 0));
+            show = false(1, nB);
+            for b = 1:nB
+                show(b) = app.BandEdges(b+1) > app.FreqMin && ...
+                          app.BandEdges(b)   < app.FreqMax;
+            end
+            visIdx = find(show);
+            if isempty(visIdx), cla(ax); return; end
+
+            ampPerBand = sqrt(max(bandEnergy(visIdx), 0));
             cla(ax);
-            bh = bar(ax, 1:nB, ampPerBand, 'FaceColor', 'flat', 'EdgeColor', 'none');
-            bh.CData = app.BandColors(1:nB,:);
-            ax.XLim = [0.4, nB+0.6];
+            bh = bar(ax, 1:numel(visIdx), ampPerBand, 'FaceColor', 'flat', 'EdgeColor', 'none');
+            bh.CData = app.BandColors(visIdx, :);
+            ax.XLim = [0.4, numel(visIdx)+0.6];
+            ax.XTick = 1:numel(visIdx);
+            allLabels = {'5','10','20','40','80','160','315','630','1.25k','2.5k','5k'};
+            ax.XTickLabel = allLabels(visIdx);
+            ax.XTickLabelRotation = 45;
             % Decay peak so Y axis breathes down when signal quiets
             app.EqualizerYMax = max(app.EqualizerYMax * 0.97, max(ampPerBand) * 1.3);
             ax.YLim = [0, max(app.EqualizerYMax, 1e-4)];
