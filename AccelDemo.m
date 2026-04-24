@@ -17,6 +17,7 @@ classdef AccelDemo < handle
         SpecMethodDropdown
         FreqMinEdit
         FreqMaxEdit
+        SpecWindowSwitch
 
         %--- Plots ---
         TimeAxes
@@ -80,6 +81,9 @@ classdef AccelDemo < handle
         EqualizerYMax = 0   % decaying peak for Y axis scaling
         SpectrumYMax  = 0   % decaying peak for spectrum Y axis
 
+        %--- Spectrum window mode ---
+        SpecWindowMode = 'Live'   % 'Live' = 1s | 'Strip' = full display buffer
+
         %--- Frequency display range ---
         FreqMin = 5
         FreqMax = 10000     % updated to SampleRate/2 on connect
@@ -138,11 +142,11 @@ classdef AccelDemo < handle
                 'BorderType', 'none');
             cp.Layout.Row = 1; cp.Layout.Column = 1;
 
-            g = uigridlayout(cp, [2 16]);
+            g = uigridlayout(cp, [2 17]);
             g.BackgroundColor = [0.17 0.17 0.24];
             g.Padding   = [12 8 12 8];
             g.RowHeight = {'1x','1x'};
-            g.ColumnWidth = {110, 110, 110, 14, 70, 160, 14, 110, 130, 14, 90, 120, 14, 80, 110, '1x'};
+            g.ColumnWidth = {110, 110, 110, 14, 70, 160, 14, 110, 130, 14, 90, 120, 14, 80, 110, 150, '1x'};
             g.RowSpacing    = 4;
             g.ColumnSpacing = 4;
 
@@ -220,6 +224,19 @@ classdef AccelDemo < handle
                 'BackgroundColor', [0.23 0.23 0.32], 'FontColor', 'white', ...
                 'ValueChangedFcn', @(s,~) app.onFreqMaxChanged(s.Value));
             app.FreqMaxEdit.Layout.Row = 2; app.FreqMaxEdit.Layout.Column = 15;
+
+            % Spectrum window toggle
+            swLbl = uilabel(g, 'Text', 'Spectrum Window', ...
+                'FontColor', [0.78 0.78 0.80], 'FontSize', 11, ...
+                'HorizontalAlignment', 'center');
+            swLbl.Layout.Row = 1; swLbl.Layout.Column = 16;
+
+            app.SpecWindowSwitch = uiswitch(g, 'slider', ...
+                'Items', {'Live', 'Strip'}, ...
+                'Value', 'Live', ...
+                'FontColor', [0.78 0.78 0.80], ...
+                'ValueChangedFcn', @(s,~) app.onSpecWindowChanged(s.Value));
+            app.SpecWindowSwitch.Layout.Row = 2; app.SpecWindowSwitch.Layout.Column = 16;
         end
 
         % --- Stats panel (row 2) -------------------------------------------
@@ -425,9 +442,13 @@ classdef AccelDemo < handle
                 n = length(xg);
                 app.DisplayBuffer = [app.DisplayBuffer(n+1:end); xg];
 
-                % ---- Spectrum (nfft = SampleRate gives exactly 1 Hz bins) ----
-                nfft     = app.SampleRate;
-                winData  = app.DisplayBuffer(end-nfft+1:end);  % 1 second of data
+                % ---- Spectrum window selection ----
+                nfft = app.SampleRate;  % 1 Hz bins
+                if strcmp(app.SpecWindowMode, 'Strip')
+                    winData = app.DisplayBuffer;          % full strip chart window
+                else
+                    winData = app.DisplayBuffer(end-nfft+1:end);  % live 1s window
+                end
                 noverlap = floor(nfft * 0.5);
                 [pxx, f] = pwelch(winData, hann(nfft), noverlap, nfft, app.SampleRate);
                 mag = sqrt(pxx);  % amplitude spectral density
@@ -700,6 +721,11 @@ classdef AccelDemo < handle
         function onFreqMaxChanged(app, val)
             app.FreqMax = val;
             app.EqualizerYMax = 0;
+        end
+        function onSpecWindowChanged(app, val)
+            app.SpecWindowMode  = val;
+            app.PeakHoldSpectrum = [];  % clear peak hold on mode switch
+            app.SpectrumYMax     = 0;
         end
     end
 end
