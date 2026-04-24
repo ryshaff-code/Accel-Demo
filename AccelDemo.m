@@ -4,7 +4,14 @@ classdef AccelDemo < handle
 %   Usage: app = AccelDemo();
 
     properties (Constant, Access = private)
-        FontSz = 11   % ← change this to resize all text in the UI
+        FontSz = 11        % ← change this to resize all text in the UI
+        SpectrogramCmap = 'jet'  % ← spectrogram colormap. Common options:
+                                 %   'jet'    – blue→cyan→green→yellow→red (classic)
+                                 %   'turbo'  – improved rainbow, better contrast (R2020b+)
+                                 %   'hot'    – black→red→yellow→white
+                                 %   'parula' – MATLAB default blue→yellow
+                                 %   'cool'   – cyan→magenta
+                                 %   'hsv'    – full hue cycle
     end
 
     properties (Access = private)
@@ -322,7 +329,7 @@ classdef AccelDemo < handle
             app.SpectrogramAxes.Layout.Row = 2; app.SpectrogramAxes.Layout.Column = 1;
             app.styleAxes(app.SpectrogramAxes, 'Time (s)', 'Frequency (Hz)', 'Spectrogram');
             app.SpectrogramAxes.YScale = 'log';
-            colormap(app.SpectrogramAxes, 'hot');
+            colormap(app.SpectrogramAxes, app.SpectrogramCmap);
 
             % [R2,C2] Equalizer bands
             app.EqualizerAxes = uiaxes(g);
