@@ -60,14 +60,23 @@ classdef AccelDemo < handle
         %--- Timers ---
         SessionTimer
 
-        %--- Equalizer band edges (Hz) ---
-        BandEdges = [5, 10, 50, 200, 1000, 5000, 10000]
-        BandColors = [0.25 0.90 0.40;
-                      0.20 0.75 0.95;
-                      1.00 0.85 0.15;
-                      1.00 0.50 0.10;
-                      0.90 0.20 0.30;
-                      0.80 0.20 0.95]
+        %--- Equalizer ---
+        BandEdges = [5, 10, 20, 40, 80, 160, 315, 630, 1250, 2500, 5000, 10000]
+        BandColors = [0.20 0.95 0.45;
+                      0.25 0.88 0.70;
+                      0.20 0.80 0.95;
+                      0.20 0.55 1.00;
+                      0.50 0.30 1.00;
+                      0.80 0.20 1.00;
+                      1.00 0.20 0.75;
+                      1.00 0.20 0.30;
+                      1.00 0.45 0.10;
+                      1.00 0.72 0.00;
+                      0.70 0.95 0.10]
+        EqualizerYMax = 0   % decaying peak for Y axis scaling
+
+        %--- Histogram axes ---
+        HistAxes
     end
 
     %======================================================================
@@ -270,23 +279,17 @@ classdef AccelDemo < handle
             % [R2,C2] Equalizer bands
             app.EqualizerAxes = uiaxes(g);
             app.EqualizerAxes.Layout.Row = 2; app.EqualizerAxes.Layout.Column = 2;
-            app.styleAxes(app.EqualizerAxes, 'Frequency Band', 'Energy (g²)', 'Band Energizer');
-            app.EqualizerAxes.YScale = 'log';
-            app.EqualizerAxes.XLim = [0.5 6.5];
-            app.EqualizerAxes.XTick = 1:6;
-            app.EqualizerAxes.XTickLabel = {'5-10', '10-50', '50-200', '200-1k', '1k-5k', '5k-10k'};
-            app.EqualizerAxes.XTickLabelRotation = 35;
+            app.styleAxes(app.EqualizerAxes, '', 'Amplitude (g)', 'Band Energizer');
+            app.EqualizerAxes.XLim = [0.5 11.5];
+            app.EqualizerAxes.XTick = 1:11;
+            app.EqualizerAxes.XTickLabel = {'5','10','20','40','80','160','315','630','1.25k','2.5k','5k'};
+            app.EqualizerAxes.XTickLabelRotation = 45;
+            app.EqualizerAxes.YLim = [0 1];
 
-            % [R2,C3] Lissajous placeholder
-            lissPanel = uipanel(g, ...
-                'BackgroundColor', [0.14 0.14 0.20], 'BorderType', 'none');
-            lissPanel.Layout.Row = 2; lissPanel.Layout.Column = 3;
-            lissGrid = uigridlayout(lissPanel, [1 1]);
-            lissGrid.BackgroundColor = [0.14 0.14 0.20];
-            uilabel(lissGrid, ...
-                'Text', sprintf('Lissajous\n(X vs Y)\n\nRequires\nmulti-axis\nconfiguration'), ...
-                'FontColor', [0.35 0.38 0.48], 'FontSize', 12, ...
-                'HorizontalAlignment', 'center', 'VerticalAlignment', 'center');
+            % [R2,C3] Acceleration histogram
+            app.HistAxes = uiaxes(g);
+            app.HistAxes.Layout.Row = 2; app.HistAxes.Layout.Column = 3;
+            app.styleAxes(app.HistAxes, 'Acceleration (g)', 'Count', 'Shake Distribution');
         end
 
         % ------------------------------------------------------------------
@@ -318,7 +321,7 @@ classdef AccelDemo < handle
 
                 % X axis — ai0  (differential, change to SingleEnded if needed)
                 ch = addinput(app.DAQObj, devID, "ai0", "Voltage");
-                ch.TerminalConfig = "Differential";
+                ch.TerminalConfig = "SingleEnded";
                 % Future Y: addinput(app.DAQObj, devID, "ai1", "Voltage");
                 % Future Z: addinput(app.DAQObj, devID, "ai2", "Voltage");
 
@@ -439,14 +442,17 @@ classdef AccelDemo < handle
                 end
                 app.SpecBuffer = [app.SpecBuffer(:, 2:end), specCol];
 
-                % ---- Render (rate-limited) ----
+                % ---- Set scalar values before drawnow so they flush together ----
+                app.ShakeGauge.Value = min(rmsVal, 5);
+                app.renderStats(rmsVal, domFreq);
+
+                % ---- Render plots (rate-limited to ~20 fps) ----
                 drawnow limitrate;
                 app.renderTimeDomain();
                 app.renderSpectrum(fv, magv);
                 app.renderSpectrogram(fv);
                 app.renderEqualizer(bandEnergy);
-                app.renderStats(rmsVal, domFreq);
-                app.ShakeGauge.Value = min(rmsVal, 5);
+                app.renderHistogram();
 
             catch ME
                 warning('AccelDemo:callback', '%s', ME.message);
@@ -492,16 +498,27 @@ classdef AccelDemo < handle
         end
 
         function renderEqualizer(app, bandEnergy)
-            ax  = app.EqualizerAxes;
+            ax = app.EqualizerAxes;
+            nB = numel(bandEnergy);
+            % Convert energy to RMS amplitude per band for linear display
+            ampPerBand = sqrt(max(bandEnergy, 0));
             cla(ax);
-            nB  = numel(bandEnergy);
-            bh  = bar(ax, 1:nB, max(bandEnergy, 1e-14), 'FaceColor', 'flat', 'EdgeColor', 'none');
+            bh = bar(ax, 1:nB, ampPerBand, 'FaceColor', 'flat', 'EdgeColor', 'none');
             bh.CData = app.BandColors(1:nB,:);
-            ax.XLim  = [0.4, nB+0.6];
-            ymax = max(bandEnergy)*20;
-            if ymax > 0
-                ax.YLim = [1e-10, ymax];
-            end
+            ax.XLim = [0.4, nB+0.6];
+            % Decay peak so Y axis breathes down when signal quiets
+            app.EqualizerYMax = max(app.EqualizerYMax * 0.97, max(ampPerBand) * 1.3);
+            ax.YLim = [0, max(app.EqualizerYMax, 1e-4)];
+        end
+
+        function renderHistogram(app)
+            ax = app.HistAxes;
+            data = app.DisplayBuffer;
+            if max(abs(data)) < 1e-6, return; end
+            cla(ax);
+            histogram(ax, data, 60, ...
+                'FaceColor', [0.55 0.35 1.00], 'EdgeColor', 'none', 'Normalization', 'count');
+            ax.XLim = [-max(abs(data))*1.2, max(abs(data))*1.2];
         end
 
         function renderStats(app, rmsVal, domFreq)
@@ -533,6 +550,7 @@ classdef AccelDemo < handle
             app.TimeVector       = linspace(-app.DisplaySec, 0, N);
             app.PeakHoldSpectrum = [];
             app.SpecBuffer       = [];
+            app.EqualizerYMax    = 0;
         end
 
         function refreshButtonStates(app)
