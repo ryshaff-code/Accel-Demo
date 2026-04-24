@@ -63,7 +63,9 @@ classdef AccelDemo < handle
         SessionTimer
 
         %--- Equalizer ---
-        BandEdges = [5, 10, 20, 40, 80, 160, 315, 630, 1250, 2500, 5000, 10000]
+        NumBands  = 11   % always show this many bars regardless of freq range
+        LastFv    = []   % most recent frequency vector (for dynamic band calc)
+        LastMagv  = []   % most recent magnitude vector
         BandColors = [0.20 0.95 0.45;
                       0.25 0.88 0.70;
                       0.20 0.80 0.95;
@@ -453,14 +455,9 @@ classdef AccelDemo < handle
                     app.PeakAccel = peakNew;
                 end
 
-                % ---- Equalizer band energies ----
-                bandEnergy = zeros(1, numel(app.BandEdges)-1);
-                for b = 1:numel(bandEnergy)
-                    idx = fv >= app.BandEdges(b) & fv < app.BandEdges(b+1);
-                    if any(idx)
-                        bandEnergy(b) = mean(magv(idx).^2);
-                    end
-                end
+                % Store spectrum for dynamic equalizer band computation
+                app.LastFv   = fv;
+                app.LastMagv = magv;
 
                 % ---- Spectrogram columns ----
                 % Advance by as many columns as the received chunk represents so
@@ -483,7 +480,7 @@ classdef AccelDemo < handle
                 app.renderTimeDomain();
                 app.renderSpectrum(fv, magv);
                 app.renderSpectrogram(fv);
-                app.renderEqualizer(bandEnergy);
+                app.renderEqualizer();
                 app.renderHistogram();
 
             catch ME
@@ -537,25 +534,43 @@ classdef AccelDemo < handle
             ax.YLim = [fVis(1), fVis(end)];
         end
 
-        function renderEqualizer(app, bandEnergy)
-            ax = app.EqualizerAxes;
-            % Keep only bands whose range overlaps [FreqMin, FreqMax]
-            loEdges = app.BandEdges(1:end-1);
-            hiEdges = app.BandEdges(2:end);
-            visIdx  = find(hiEdges > app.FreqMin & loEdges < app.FreqMax);
-            if isempty(visIdx), cla(ax); return; end
+        function renderEqualizer(app)
+            if isempty(app.LastFv), return; end
+            ax  = app.EqualizerAxes;
+            fLo = max(app.FreqMin, app.LastFv(1));
+            fHi = min(app.FreqMax, app.LastFv(end));
+            if fLo >= fHi, cla(ax); return; end
 
-            ampPerBand = sqrt(max(bandEnergy(visIdx), 0));
+            % NumBands log-spaced edges spanning [fLo, fHi]
+            edges = logspace(log10(fLo), log10(fHi), app.NumBands + 1);
+
+            bandAmp = zeros(1, app.NumBands);
+            for b = 1:app.NumBands
+                idx = app.LastFv >= edges(b) & app.LastFv < edges(b+1);
+                if any(idx)
+                    bandAmp(b) = sqrt(mean(app.LastMagv(idx).^2));
+                end
+            end
+
+            % Tick label = geometric centre frequency of each band
+            cFreq  = sqrt(edges(1:end-1) .* edges(2:end));
+            labels = cell(1, app.NumBands);
+            for b = 1:app.NumBands
+                if cFreq(b) >= 1000
+                    labels{b} = sprintf('%.1fk', cFreq(b)/1000);
+                else
+                    labels{b} = sprintf('%.0f', cFreq(b));
+                end
+            end
+
             cla(ax);
-            bh = bar(ax, 1:numel(visIdx), ampPerBand, 'FaceColor', 'flat', 'EdgeColor', 'none');
-            bh.CData = app.BandColors(visIdx, :);
-            ax.XLim = [0.4, numel(visIdx)+0.6];
-            ax.XTick = 1:numel(visIdx);
-            allLabels = {'5','10','20','40','80','160','315','630','1.25k','2.5k','5k'};
-            ax.XTickLabel = allLabels(visIdx);
+            bh = bar(ax, 1:app.NumBands, bandAmp, 'FaceColor', 'flat', 'EdgeColor', 'none');
+            bh.CData = app.BandColors;
+            ax.XLim  = [0.4, app.NumBands + 0.6];
+            ax.XTick = 1:app.NumBands;
+            ax.XTickLabel = labels;
             ax.XTickLabelRotation = 45;
-            % Decay peak so Y axis breathes down when signal quiets
-            app.EqualizerYMax = max(app.EqualizerYMax * 0.97, max(ampPerBand) * 1.3);
+            app.EqualizerYMax = max(app.EqualizerYMax * 0.97, max(bandAmp) * 1.3);
             ax.YLim = [0, max(app.EqualizerYMax, 1e-4)];
         end
 
