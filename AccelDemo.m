@@ -523,25 +523,26 @@ classdef AccelDemo < handle
 
         function renderSpectrogram(app, f)
             if isempty(app.SpecBuffer), return; end
-            tAxis = linspace(-app.DisplaySec, 0, app.NumSpecCols);
-            imagesc(app.SpectrogramAxes, tAxis, f, 20*log10(app.SpecBuffer + 1e-12));
+            % Slice to visible freq range so all rows fill the display
+            mask = f >= max(app.FreqMin, f(1)) & f <= min(app.FreqMax, f(end));
+            if ~any(mask), return; end
+            fVis   = f(mask);
+            bufVis = app.SpecBuffer(mask, :);
+            tAxis  = linspace(-app.DisplaySec, 0, app.NumSpecCols);
+            imagesc(app.SpectrogramAxes, tAxis, fVis, 20*log10(bufVis + 1e-12));
             ax = app.SpectrogramAxes;
-            ax.YDir  = 'normal';
-            ax.XDir  = 'normal';
-            ax.XLim  = [-app.DisplaySec, 0];
-            ax.YLim  = [max(app.FreqMin, 1), min(app.FreqMax, app.SampleRate/2)];
+            ax.YDir = 'normal';
+            ax.XDir = 'normal';
+            ax.XLim = [-app.DisplaySec, 0];
+            ax.YLim = [fVis(1), fVis(end)];
         end
 
         function renderEqualizer(app, bandEnergy)
             ax = app.EqualizerAxes;
-            % Keep only bands that overlap [FreqMin, FreqMax]
-            nB = numel(bandEnergy);
-            show = false(1, nB);
-            for b = 1:nB
-                show(b) = app.BandEdges(b+1) > app.FreqMin && ...
-                          app.BandEdges(b)   < app.FreqMax;
-            end
-            visIdx = find(show);
+            % Keep only bands whose range overlaps [FreqMin, FreqMax]
+            loEdges = app.BandEdges(1:end-1);
+            hiEdges = app.BandEdges(2:end);
+            visIdx  = find(hiEdges > app.FreqMin & loEdges < app.FreqMax);
             if isempty(visIdx), cla(ax); return; end
 
             ampPerBand = sqrt(max(bandEnergy(visIdx), 0));
@@ -678,7 +679,13 @@ classdef AccelDemo < handle
 
         function onBiasChanged(app, val),    app.Bias = val;          end
         function onScaleChanged(app, val),   app.ScaleFactor = val;   end
-        function onFreqMinChanged(app, val), app.FreqMin = val;        end
-        function onFreqMaxChanged(app, val), app.FreqMax = val;        end
+        function onFreqMinChanged(app, val)
+            app.FreqMin = val;
+            app.EqualizerYMax = 0;
+        end
+        function onFreqMaxChanged(app, val)
+            app.FreqMax = val;
+            app.EqualizerYMax = 0;
+        end
     end
 end
