@@ -685,7 +685,7 @@ classdef AccelDemo < handle
             ax.FontSize        = app.FontSz;
         end
 
-        function btn = makeButton(~, parent, txt, color, cb)
+        function btn = makeButton(app, parent, txt, color, cb)
             btn = uibutton(parent, 'Text', txt, ...
                 'BackgroundColor', color, ...
                 'FontColor',  'white', ...
@@ -694,7 +694,7 @@ classdef AccelDemo < handle
                 'ButtonPushedFcn', cb);
         end
 
-        function lbl = makeLabel(~, parent, txt, row, col)
+        function lbl = makeLabel(app, parent, txt, row, col)
             lbl = uilabel(parent, 'Text', txt, ...
                 'FontColor', [0.78 0.78 0.80], 'FontSize', app.FontSz);
             if numel(row) == 2
@@ -705,7 +705,7 @@ classdef AccelDemo < handle
             lbl.Layout.Column = col;
         end
 
-        function lbl = makeStatLabel(~, parent, txt, row, col)
+        function lbl = makeStatLabel(app, parent, txt, row, col)
             lbl = uilabel(parent, 'Text', txt, ...
                 'FontColor', 'white', 'FontSize', app.FontSz, 'FontWeight', 'bold', ...
                 'HorizontalAlignment', 'center');
