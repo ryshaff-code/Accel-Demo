@@ -425,9 +425,9 @@ classdef AccelDemo < handle
                 n = length(xg);
                 app.DisplayBuffer = [app.DisplayBuffer(n+1:end); xg];
 
-                % ---- Spectrum (pwelch on fixed-length window, not full buffer) ----
-                nfft     = app.FFTPoints;
-                winData  = app.DisplayBuffer(end-nfft+1:end);  % most recent nfft samples
+                % ---- Spectrum (nfft = SampleRate gives exactly 1 Hz bins) ----
+                nfft     = app.SampleRate;
+                winData  = app.DisplayBuffer(end-nfft+1:end);  % 1 second of data
                 noverlap = floor(nfft * 0.5);
                 [pxx, f] = pwelch(winData, hann(nfft), noverlap, nfft, app.SampleRate);
                 mag = sqrt(pxx);  % amplitude spectral density
