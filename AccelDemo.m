@@ -661,7 +661,7 @@ classdef AccelDemo < handle
             app.SessionTimer = [];
         end
 
-        function styleAxes(~, ax, xlab, ylab, ttl)
+        function styleAxes(app, ax, xlab, ylab, ttl)
             ax.Color      = [0.09 0.09 0.14];
             ax.XColor     = [0.68 0.68 0.72];
             ax.YColor     = [0.68 0.68 0.72];
