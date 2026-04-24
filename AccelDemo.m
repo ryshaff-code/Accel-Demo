@@ -540,18 +540,24 @@ classdef AccelDemo < handle
 
         function renderSpectrogram(app, f)
             if isempty(app.SpecBuffer), return; end
-            % Slice to visible freq range so all rows fill the display
-            mask = f >= max(app.FreqMin, f(1)) & f <= min(app.FreqMax, f(end));
-            if ~any(mask), return; end
-            fVis   = f(mask);
-            bufVis = app.SpecBuffer(mask, :);
-            tAxis  = linspace(-app.DisplaySec, 0, app.NumSpecCols);
-            imagesc(app.SpectrogramAxes, tAxis, fVis, 20*log10(bufVis + 1e-12));
+            fLo = max(app.FreqMin, f(1));
+            fHi = min(app.FreqMax, f(end));
+            if fLo >= fHi, return; end
+
+            % Resample onto a log-spaced grid so imagesc pixels align correctly
+            % with the log Y axis (imagesc distributes pixels linearly between
+            % provided coordinates, so coordinates must match the axis scale).
+            fLog   = logspace(log10(fLo), log10(fHi), 256)';
+            mask   = f >= fLo & f <= fHi;
+            bufLog = interp1(f(mask), app.SpecBuffer(mask, :), fLog, 'linear', 0);
+
+            tAxis = linspace(-app.DisplaySec, 0, app.NumSpecCols);
+            imagesc(app.SpectrogramAxes, tAxis, fLog, 20*log10(bufLog + 1e-12));
             ax = app.SpectrogramAxes;
             ax.YDir = 'normal';
             ax.XDir = 'normal';
             ax.XLim = [-app.DisplaySec, 0];
-            ax.YLim = [fVis(1), fVis(end)];
+            ax.YLim = [fLo, fHi];
         end
 
         function renderEqualizer(app)
