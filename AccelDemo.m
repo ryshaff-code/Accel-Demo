@@ -505,13 +505,8 @@ classdef AccelDemo < handle
 
         function renderSpectrum(app, f, mag)
             ax = app.SpectrumAxes;
-            cla(ax); hold(ax, 'on');
-            if ~isempty(app.PeakHoldSpectrum)
-                plot(ax, f, app.PeakHoldSpectrum, ...
-                    'Color', [0.90 0.30 0.30], 'LineWidth', 0.8, 'LineStyle', '--');
-            end
+            cla(ax);
             plot(ax, f, mag, 'Color', [0.25 0.92 0.48], 'LineWidth', 1.3);
-            hold(ax, 'off');
             ax.XLim = [max(app.FreqMin, 1), min(app.FreqMax, app.SampleRate/2)];
             % Decaying Y max — tracks peak slowly downward
             app.SpectrumYMax = max(app.SpectrumYMax * 0.97, max(mag) * 1.25);
