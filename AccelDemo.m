@@ -3,6 +3,10 @@ classdef AccelDemo < handle
 %   Requires: Data Acquisition Toolbox + NI hardware support package.
 %   Usage: app = AccelDemo();
 
+    properties (Constant, Access = private)
+        FontSz = 11   % ← change this to resize all text in the UI
+    end
+
     properties (Access = private)
         %--- UI ---
         UIFigure
@@ -169,11 +173,11 @@ classdef AccelDemo < handle
             % Device
             app.makeLabel(g, 'Device:', 1, 5);
             app.DeviceDropdown = uidropdown(g, 'Items', {'(click Connect)'}, ...
-                'BackgroundColor', [0.23 0.23 0.32], 'FontColor', 'white', 'FontSize', 18);
+                'BackgroundColor', [0.23 0.23 0.32], 'FontColor', 'white', 'FontSize', app.FontSz);
             app.DeviceDropdown.Layout.Row = 1; app.DeviceDropdown.Layout.Column = 6;
 
             app.StatusLabel = uilabel(g, 'Text', 'Not connected', ...
-                'FontColor', [0.55 0.55 0.60], 'FontSize', 12, 'FontAngle', 'italic');
+                'FontColor', [0.55 0.55 0.60], 'FontSize', app.FontSz, 'FontAngle', 'italic');
             app.StatusLabel.Layout.Row = 2; app.StatusLabel.Layout.Column = 6;
 
             % Separator
@@ -187,7 +191,7 @@ classdef AccelDemo < handle
                 'ValueChangedFcn', @(s,~) app.onSampleRateChanged(s.Value));
             app.SampleRateEdit.Layout.Row = 1; app.SampleRateEdit.Layout.Column = 9;
             lhpf = uilabel(g, 'Text', 'Sensor HPF: 2 Hz', ...
-                'FontColor', [0.45 0.80 0.45], 'FontSize', 12, 'FontAngle', 'italic');
+                'FontColor', [0.45 0.80 0.45], 'FontSize', app.FontSz, 'FontAngle', 'italic');
             lhpf.Layout.Row = 2; lhpf.Layout.Column = [8 9];
 
             % Separator
@@ -227,7 +231,7 @@ classdef AccelDemo < handle
 
             % Spectrum window toggle
             swLbl = uilabel(g, 'Text', 'Spectrum Window', ...
-                'FontColor', [0.78 0.78 0.80], 'FontSize', 18, ...
+                'FontColor', [0.78 0.78 0.80], 'FontSize', app.FontSz, ...
                 'HorizontalAlignment', 'center');
             swLbl.Layout.Row = 1; swLbl.Layout.Column = 16;
 
@@ -256,7 +260,7 @@ classdef AccelDemo < handle
             titles = {'Peak Accel', 'RMS Level', 'Dom. Frequency', 'Session Time'};
             for c = 1:4
                 lbl = uilabel(g, 'Text', titles{c}, ...
-                    'FontColor', [0.45 0.65 1.0], 'FontSize', 12, ...
+                    'FontColor', [0.45 0.65 1.0], 'FontSize', app.FontSz, ...
                     'HorizontalAlignment', 'center');
                 lbl.Layout.Row = 1; lbl.Layout.Column = c;
             end
@@ -302,7 +306,7 @@ classdef AccelDemo < handle
             gaugeGrid.RowHeight = {20, '1x'};
             gaugeGrid.Padding = [6 6 6 6];
             titleLbl = uilabel(gaugeGrid, 'Text', 'Shake-O-Meter  (g RMS)', ...
-                'FontColor', [0.5 0.75 1.0], 'FontSize', 12, ...
+                'FontColor', [0.5 0.75 1.0], 'FontSize', app.FontSz, ...
                 'HorizontalAlignment', 'center', 'FontWeight', 'bold');
             titleLbl.Layout.Row = 1; titleLbl.Layout.Column = 1;
             app.ShakeGauge = uigauge(gaugeGrid, 'semicircular', ...
@@ -667,12 +671,12 @@ classdef AccelDemo < handle
             ax.YGrid      = 'on';
             ax.Title.String    = ttl;
             ax.Title.Color     = [0.55 0.78 1.00];
-            ax.Title.FontSize  = 13;
+            ax.Title.FontSize  = app.FontSz;
             ax.XLabel.String   = xlab;
             ax.XLabel.Color    = [0.68 0.68 0.72];
             ax.YLabel.String   = ylab;
             ax.YLabel.Color    = [0.68 0.68 0.72];
-            ax.FontSize        = 11;
+            ax.FontSize        = app.FontSz;
         end
 
         function btn = makeButton(~, parent, txt, color, cb)
@@ -680,13 +684,13 @@ classdef AccelDemo < handle
                 'BackgroundColor', color, ...
                 'FontColor',  'white', ...
                 'FontWeight', 'bold', ...
-                'FontSize',   13, ...
+                'FontSize', app.FontSz, ...
                 'ButtonPushedFcn', cb);
         end
 
         function lbl = makeLabel(~, parent, txt, row, col)
             lbl = uilabel(parent, 'Text', txt, ...
-                'FontColor', [0.78 0.78 0.80], 'FontSize', 18);
+                'FontColor', [0.78 0.78 0.80], 'FontSize', app.FontSz);
             if numel(row) == 2
                 lbl.Layout.Row = row;
             else
@@ -697,7 +701,7 @@ classdef AccelDemo < handle
 
         function lbl = makeStatLabel(~, parent, txt, row, col)
             lbl = uilabel(parent, 'Text', txt, ...
-                'FontColor', 'white', 'FontSize', 18, 'FontWeight', 'bold', ...
+                'FontColor', 'white', 'FontSize', app.FontSz, 'FontWeight', 'bold', ...
                 'HorizontalAlignment', 'center');
             lbl.Layout.Row = row; lbl.Layout.Column = col;
         end
