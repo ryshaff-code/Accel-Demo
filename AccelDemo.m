@@ -61,7 +61,7 @@ classdef AccelDemo < handle
         SessionTimer
 
         %--- Equalizer band edges (Hz) ---
-        BandEdges = [2, 10, 50, 200, 1000, 5000, 10000]
+        BandEdges = [5, 10, 50, 200, 1000, 5000, 10000]
         BandColors = [0.25 0.90 0.40;
                       0.20 0.75 0.95;
                       1.00 0.85 0.15;
@@ -274,7 +274,7 @@ classdef AccelDemo < handle
             app.EqualizerAxes.YScale = 'log';
             app.EqualizerAxes.XLim = [0.5 6.5];
             app.EqualizerAxes.XTick = 1:6;
-            app.EqualizerAxes.XTickLabel = {'2-10', '10-50', '50-200', '200-1k', '1k-5k', '5k-10k'};
+            app.EqualizerAxes.XTickLabel = {'5-10', '10-50', '50-200', '200-1k', '1k-5k', '5k-10k'};
             app.EqualizerAxes.XTickLabelRotation = 35;
 
             % [R2,C3] Lissajous placeholder
@@ -383,23 +383,25 @@ classdef AccelDemo < handle
         % ------------------------------------------------------------------
         function dataCallback(app, src)
             try
-                nScans = src.ScansAvailableFcnCount;
-                raw    = read(src, nScans, "OutputFormat", "Matrix");
+                % Drain ALL buffered scans to prevent accumulation lag
+                raw = read(src, "all", "OutputFormat", "Matrix");
 
                 % Calibrate: g = (V - bias) / scaleFactor
                 xg = (raw(:,1) - app.Bias) / app.ScaleFactor;
 
                 % Roll display buffer
-                app.DisplayBuffer = [app.DisplayBuffer(length(xg)+1:end); xg];
+                n = length(xg);
+                app.DisplayBuffer = [app.DisplayBuffer(n+1:end); xg];
 
-                % ---- Spectrum (pwelch on current buffer) ----
-                nfft   = min(app.FFTPoints, length(app.DisplayBuffer));
+                % ---- Spectrum (pwelch on fixed-length window, not full buffer) ----
+                nfft     = app.FFTPoints;
+                winData  = app.DisplayBuffer(end-nfft+1:end);  % most recent nfft samples
                 noverlap = floor(nfft * 0.5);
-                [pxx, f] = pwelch(app.DisplayBuffer, hann(nfft), noverlap, nfft, app.SampleRate);
+                [pxx, f] = pwelch(winData, hann(nfft), noverlap, nfft, app.SampleRate);
                 mag = sqrt(pxx);  % amplitude spectral density
 
-                % Clip to sensor bandwidth (above 2 Hz)
-                validMask = f >= 2;
+                % Clip below 5 Hz — avoids AC rolloff artifact at sensor corner frequency
+                validMask = f >= 5;
                 fv  = f(validMask);
                 magv = mag(validMask);
 
@@ -475,7 +477,7 @@ classdef AccelDemo < handle
             end
             plot(ax, f, mag, 'Color', [0.25 0.92 0.48], 'LineWidth', 1.3);
             hold(ax, 'off');
-            ax.XLim = [2, app.SampleRate/2];
+            ax.XLim = [5, app.SampleRate/2];
             if max(mag) > 0
                 ax.YLim = [0, max(mag)*1.2];
             end
@@ -486,7 +488,7 @@ classdef AccelDemo < handle
             tAxis = linspace(-app.DisplaySec, 0, app.NumSpecCols);
             imagesc(app.SpectrogramAxes, tAxis, f, 20*log10(app.SpecBuffer + 1e-12));
             app.SpectrogramAxes.YDir  = 'normal';
-            app.SpectrogramAxes.YLim  = [2, app.SampleRate/2];
+            app.SpectrogramAxes.YLim  = [5, app.SampleRate/2];
         end
 
         function renderEqualizer(app, bandEnergy)
