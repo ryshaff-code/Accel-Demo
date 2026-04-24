@@ -15,6 +15,8 @@ classdef AccelDemo < handle
         BiasEdit
         ScaleFactorEdit
         SpecMethodDropdown
+        FreqMinEdit
+        FreqMaxEdit
 
         %--- Plots ---
         TimeAxes
@@ -51,7 +53,7 @@ classdef AccelDemo < handle
         TimeVector           % [1 x N] time axis
         PeakHoldSpectrum     % [1 x F] peak-hold magnitude
         SpecBuffer           % [F x NumSpecCols] scrolling spectrogram
-        NumSpecCols = 120
+        NumSpecCols = 100   % DisplaySec / ChunkSec = 5 / 0.05
 
         %--- Session stats ---
         PeakAccel = 0
@@ -74,6 +76,11 @@ classdef AccelDemo < handle
                       1.00 0.72 0.00;
                       0.70 0.95 0.10]
         EqualizerYMax = 0   % decaying peak for Y axis scaling
+        SpectrumYMax  = 0   % decaying peak for spectrum Y axis
+
+        %--- Frequency display range ---
+        FreqMin = 5
+        FreqMax = 10000     % updated to SampleRate/2 on connect
 
         %--- Histogram axes ---
         HistAxes
@@ -129,11 +136,11 @@ classdef AccelDemo < handle
                 'BorderType', 'none');
             cp.Layout.Row = 1; cp.Layout.Column = 1;
 
-            g = uigridlayout(cp, [2 13]);
+            g = uigridlayout(cp, [2 16]);
             g.BackgroundColor = [0.17 0.17 0.24];
             g.Padding   = [12 8 12 8];
             g.RowHeight = {'1x','1x'};
-            g.ColumnWidth = {110, 110, 110, 14, 70, 160, 14, 110, 130, 14, 90, 120, '1x'};
+            g.ColumnWidth = {110, 110, 110, 14, 70, 160, 14, 110, 130, 14, 90, 120, 14, 80, 110, '1x'};
             g.RowSpacing    = 4;
             g.ColumnSpacing = 4;
 
@@ -193,6 +200,24 @@ classdef AccelDemo < handle
                 'BackgroundColor', [0.23 0.23 0.32], 'FontColor', 'white', ...
                 'ValueChangedFcn', @(s,~) app.onScaleChanged(s.Value));
             app.ScaleFactorEdit.Layout.Row = 2; app.ScaleFactorEdit.Layout.Column = 12;
+
+            % Separator
+            app.makeLabel(g, '', [1 2], 13);
+
+            % Frequency range
+            app.makeLabel(g, 'F Min (Hz):', 1, 14);
+            app.FreqMinEdit = uieditfield(g, 'numeric', 'Value', app.FreqMin, ...
+                'Limits', [1 999999], ...
+                'BackgroundColor', [0.23 0.23 0.32], 'FontColor', 'white', ...
+                'ValueChangedFcn', @(s,~) app.onFreqMinChanged(s.Value));
+            app.FreqMinEdit.Layout.Row = 1; app.FreqMinEdit.Layout.Column = 15;
+
+            app.makeLabel(g, 'F Max (Hz):', 2, 14);
+            app.FreqMaxEdit = uieditfield(g, 'numeric', 'Value', app.FreqMax, ...
+                'Limits', [2 1000000], ...
+                'BackgroundColor', [0.23 0.23 0.32], 'FontColor', 'white', ...
+                'ValueChangedFcn', @(s,~) app.onFreqMaxChanged(s.Value));
+            app.FreqMaxEdit.Layout.Row = 2; app.FreqMaxEdit.Layout.Column = 15;
         end
 
         % --- Stats panel (row 2) -------------------------------------------
@@ -329,6 +354,8 @@ classdef AccelDemo < handle
                 app.DAQObj.ScansAvailableFcn      = @(src,~) app.dataCallback(src);
                 app.DAQObj.ScansAvailableFcnCount = chunkScans;
 
+                app.FreqMax = app.SampleRate / 2;
+                app.FreqMaxEdit.Value = app.FreqMax;
                 app.IsConnected = true;
                 app.StatusLabel.Text      = sprintf('Connected: %s', devID);
                 app.StatusLabel.FontColor = [0.35 0.90 0.35];
@@ -483,18 +510,21 @@ classdef AccelDemo < handle
             end
             plot(ax, f, mag, 'Color', [0.25 0.92 0.48], 'LineWidth', 1.3);
             hold(ax, 'off');
-            ax.XLim = [5, app.SampleRate/2];
-            if max(mag) > 0
-                ax.YLim = [0, max(mag)*1.2];
-            end
+            ax.XLim = [max(app.FreqMin, 1), min(app.FreqMax, app.SampleRate/2)];
+            % Decaying Y max — tracks peak slowly downward
+            app.SpectrumYMax = max(app.SpectrumYMax * 0.97, max(mag) * 1.25);
+            ax.YLim = [0, max(app.SpectrumYMax, 1e-5)];
         end
 
         function renderSpectrogram(app, f)
             if isempty(app.SpecBuffer), return; end
             tAxis = linspace(-app.DisplaySec, 0, app.NumSpecCols);
             imagesc(app.SpectrogramAxes, tAxis, f, 20*log10(app.SpecBuffer + 1e-12));
-            app.SpectrogramAxes.YDir  = 'normal';
-            app.SpectrogramAxes.YLim  = [5, app.SampleRate/2];
+            ax = app.SpectrogramAxes;
+            ax.YDir  = 'normal';
+            ax.XDir  = 'normal';
+            ax.XLim  = [-app.DisplaySec, 0];
+            ax.YLim  = [max(app.FreqMin, 1), min(app.FreqMax, app.SampleRate/2)];
         end
 
         function renderEqualizer(app, bandEnergy)
@@ -551,6 +581,7 @@ classdef AccelDemo < handle
             app.PeakHoldSpectrum = [];
             app.SpecBuffer       = [];
             app.EqualizerYMax    = 0;
+            app.SpectrumYMax     = 0;
         end
 
         function refreshButtonStates(app)
@@ -628,7 +659,9 @@ classdef AccelDemo < handle
             end
         end
 
-        function onBiasChanged(app, val),  app.Bias = val;        end
-        function onScaleChanged(app, val), app.ScaleFactor = val; end
+        function onBiasChanged(app, val),    app.Bias = val;          end
+        function onScaleChanged(app, val),   app.ScaleFactor = val;   end
+        function onFreqMinChanged(app, val), app.FreqMin = val;        end
+        function onFreqMaxChanged(app, val), app.FreqMax = val;        end
     end
 end
