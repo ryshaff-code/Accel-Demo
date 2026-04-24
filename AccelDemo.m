@@ -541,11 +541,15 @@ classdef AccelDemo < handle
             fHi = min(app.FreqMax, app.LastFv(end));
             if fLo >= fHi, cla(ax); return; end
 
-            % NumBands log-spaced edges spanning [fLo, fHi]
-            edges = logspace(log10(fLo), log10(fHi), app.NumBands + 1);
+            % Cap bars to available 1 Hz bins so narrow ranges don't produce empty bars
+            availBins = sum(app.LastFv >= fLo & app.LastFv <= fHi);
+            nB        = min(app.NumBands, availBins);
+            if nB < 1, cla(ax); return; end
 
-            bandAmp = zeros(1, app.NumBands);
-            for b = 1:app.NumBands
+            edges = logspace(log10(fLo), log10(fHi), nB + 1);
+
+            bandAmp = zeros(1, nB);
+            for b = 1:nB
                 idx = app.LastFv >= edges(b) & app.LastFv < edges(b+1);
                 if any(idx)
                     bandAmp(b) = sqrt(mean(app.LastMagv(idx).^2));
@@ -554,8 +558,8 @@ classdef AccelDemo < handle
 
             % Tick label = geometric centre frequency of each band
             cFreq  = sqrt(edges(1:end-1) .* edges(2:end));
-            labels = cell(1, app.NumBands);
-            for b = 1:app.NumBands
+            labels = cell(1, nB);
+            for b = 1:nB
                 if cFreq(b) >= 1000
                     labels{b} = sprintf('%.1fk', cFreq(b)/1000);
                 else
@@ -564,10 +568,10 @@ classdef AccelDemo < handle
             end
 
             cla(ax);
-            bh = bar(ax, 1:app.NumBands, bandAmp, 'FaceColor', 'flat', 'EdgeColor', 'none');
-            bh.CData = app.BandColors;
-            ax.XLim  = [0.4, app.NumBands + 0.6];
-            ax.XTick = 1:app.NumBands;
+            bh = bar(ax, 1:nB, bandAmp, 'FaceColor', 'flat', 'EdgeColor', 'none');
+            bh.CData = app.BandColors(1:nB, :);
+            ax.XLim  = [0.4, nB + 0.6];
+            ax.XTick = 1:nB;
             ax.XTickLabel = labels;
             ax.XTickLabelRotation = 45;
             app.EqualizerYMax = max(app.EqualizerYMax * 0.97, max(bandAmp) * 1.3);
