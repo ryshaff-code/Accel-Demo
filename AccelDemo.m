@@ -470,7 +470,7 @@ classdef AccelDemo < handle
                     winData = app.DisplayBuffer(end-app.SampleRate+1:end);
                 end
                 nfft     = length(winData);
-                [pxx, f] = pwelch(winData, hann(nfft), 0, nfft, app.SampleRate);
+                [pxx, f] = pwelch(winData, rectwin(nfft), 0, nfft, app.SampleRate);
                 mag = sqrt(pxx);  % amplitude spectral density
 
                 % Clip below 5 Hz — avoids AC rolloff artifact at sensor corner frequency
