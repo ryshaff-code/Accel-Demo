@@ -445,6 +445,7 @@ classdef AccelDemo < handle
             try
                 % Drain ALL buffered scans to prevent accumulation lag
                 raw = read(src, "all", "OutputFormat", "Matrix");
+                if isempty(raw), return; end   % nothing to process
 
                 % Calibrate: g = (V - bias) / scaleFactor
                 xg = (raw(:,1) - app.Bias) / app.ScaleFactor;
