@@ -139,7 +139,8 @@ classdef AccelDemo < handle
                 'Position', [80 60 1440 860], ...
                 'Color',    [0.11 0.11 0.16], ...
                 'Visible',  'off', ...
-                'CloseRequestFcn', @(~,~) delete(app));
+                'CloseRequestFcn', @(~,~) delete(app), ...
+                'SizeChangedFcn',  @(~,~) app.onFigureResize());
 
             root = uigridlayout(app.UIFigure, [3 1]);
             root.RowHeight        = {140, 68, '1x'};
@@ -159,11 +160,13 @@ classdef AccelDemo < handle
                 'BorderType', 'none');
             cp.Layout.Row = 1; cp.Layout.Column = 1;
 
-            g = uigridlayout(cp, [2 20]);
+            % 17 columns: buttons | sep | device | sep | rate+strip | sep | bias+scale | sep | fmin+fmax | switch | spacer
+            % 'fit' on label cols, '1x' on input cols — layout stretches/shrinks with window width
+            g = uigridlayout(cp, [2 17]);
             g.BackgroundColor = [0.17 0.17 0.24];
             g.Padding   = [12 8 12 8];
             g.RowHeight = {'1x','1x'};
-            g.ColumnWidth = {110, 110, 110, 14, 70, 160, 14, 110, 130, 14, 90, 120, 14, 80, 110, 14, 80, 110, 150, '1x'};
+            g.ColumnWidth = {110, 110, 110, 12, 'fit', '2x', 12, 'fit', '1x', 12, 'fit', '1x', 12, 'fit', '1x', 155, '0.1x'};
             g.RowSpacing    = 4;
             g.ColumnSpacing = 4;
 
@@ -180,10 +183,10 @@ classdef AccelDemo < handle
                 @(~,~) app.stopAcquisition());
             app.StopButton.Layout.Row = [1 2]; app.StopButton.Layout.Column = 3;
 
-            % Separator (col 4) - spacer label
+            % Separator col 4
             app.makeLabel(g, '', [1 2], 4);
 
-            % Device
+            % Device (col 5 label, col 6 dropdown/status)
             app.makeLabel(g, 'Device:', 1, 5);
             app.DeviceDropdown = uidropdown(g, 'Items', {'(click Connect)'}, ...
                 'BackgroundColor', [0.23 0.23 0.32], 'FontColor', 'white', 'FontSize', app.FontSz);
@@ -193,41 +196,44 @@ classdef AccelDemo < handle
                 'FontColor', [0.55 0.55 0.60], 'FontSize', app.FontSz, 'FontAngle', 'italic');
             app.StatusLabel.Layout.Row = 2; app.StatusLabel.Layout.Column = 6;
 
-            % Separator
+            % Separator col 7
             app.makeLabel(g, '', [1 2], 7);
 
-            % Sample rate
+            % Sample rate (row 1) + Strip length (row 2) — col 8 labels, col 9 edits
             app.makeLabel(g, 'Sample Rate (Hz):', 1, 8);
             app.SampleRateEdit = uieditfield(g, 'numeric', ...
                 'Value', app.SampleRate, 'Limits', [1000 500000], ...
                 'BackgroundColor', [0.23 0.23 0.32], 'FontColor', 'white', ...
                 'ValueChangedFcn', @(s,~) app.onSampleRateChanged(s.Value));
             app.SampleRateEdit.Layout.Row = 1; app.SampleRateEdit.Layout.Column = 9;
-            lhpf = uilabel(g, 'Text', 'Sensor HPF: 2 Hz', ...
-                'FontColor', [0.45 0.80 0.45], 'FontSize', app.FontSz, 'FontAngle', 'italic');
-            lhpf.Layout.Row = 2; lhpf.Layout.Column = [8 9];
 
-            % Separator
+            app.makeLabel(g, 'Strip (s):', 2, 8);
+            app.StripSecEdit = uieditfield(g, 'numeric', 'Value', app.DisplaySec, ...
+                'Limits', [1 60], ...
+                'BackgroundColor', [0.23 0.23 0.32], 'FontColor', 'white', ...
+                'ValueChangedFcn', @(s,~) app.onStripSecChanged(s.Value));
+            app.StripSecEdit.Layout.Row = 2; app.StripSecEdit.Layout.Column = 9;
+
+            % Separator col 10
             app.makeLabel(g, '', [1 2], 10);
 
-            % Bias
+            % Bias (row 1) + Scale (row 2) — col 11 labels, col 12 edits
             app.makeLabel(g, 'Bias (V):', 1, 11);
             app.BiasEdit = uieditfield(g, 'numeric', 'Value', 0, ...
                 'BackgroundColor', [0.23 0.23 0.32], 'FontColor', 'white', ...
                 'ValueChangedFcn', @(s,~) app.onBiasChanged(s.Value));
             app.BiasEdit.Layout.Row = 1; app.BiasEdit.Layout.Column = 12;
 
-            % Scale factor
             app.makeLabel(g, 'Scale (V/g):', 2, 11);
             app.ScaleFactorEdit = uieditfield(g, 'numeric', 'Value', 0.000902, 'Limits', [1e-6 1e6], ...
                 'BackgroundColor', [0.23 0.23 0.32], 'FontColor', 'white', ...
                 'ValueChangedFcn', @(s,~) app.onScaleChanged(s.Value));
             app.ScaleFactorEdit.Layout.Row = 2; app.ScaleFactorEdit.Layout.Column = 12;
 
-            % Separator
+            % Separator col 13
             app.makeLabel(g, '', [1 2], 13);
 
-            % Frequency range
+            % Frequency range — col 14 labels, col 15 edits
             app.makeLabel(g, 'F Min (Hz):', 1, 14);
             app.FreqMinEdit = uieditfield(g, 'numeric', 'Value', app.FreqMin, ...
                 'Limits', [1 999999], ...
@@ -242,29 +248,18 @@ classdef AccelDemo < handle
                 'ValueChangedFcn', @(s,~) app.onFreqMaxChanged(s.Value));
             app.FreqMaxEdit.Layout.Row = 2; app.FreqMaxEdit.Layout.Column = 15;
 
-            % Separator
-            app.makeLabel(g, '', [1 2], 16);
-
-            % Strip chart length
-            app.makeLabel(g, 'Strip (s):', 1, 17);
-            app.StripSecEdit = uieditfield(g, 'numeric', 'Value', app.DisplaySec, ...
-                'Limits', [1 60], ...
-                'BackgroundColor', [0.23 0.23 0.32], 'FontColor', 'white', ...
-                'ValueChangedFcn', @(s,~) app.onStripSecChanged(s.Value));
-            app.StripSecEdit.Layout.Row = 1; app.StripSecEdit.Layout.Column = 18;
-
-            % Spectrum window toggle
+            % Spectrum window toggle — col 16
             swLbl = uilabel(g, 'Text', 'Spectrum Window', ...
                 'FontColor', [0.78 0.78 0.80], 'FontSize', app.FontSz, ...
                 'HorizontalAlignment', 'center');
-            swLbl.Layout.Row = 1; swLbl.Layout.Column = 19;
+            swLbl.Layout.Row = 1; swLbl.Layout.Column = 16;
 
             app.SpecWindowSwitch = uiswitch(g, 'slider', ...
                 'Items', {'Live', 'Strip'}, ...
                 'Value', 'Strip', ...
                 'FontColor', [0.78 0.78 0.80], ...
                 'ValueChangedFcn', @(s,~) app.onSpecWindowChanged(s.Value));
-            app.SpecWindowSwitch.Layout.Row = 2; app.SpecWindowSwitch.Layout.Column = 19;
+            app.SpecWindowSwitch.Layout.Row = 2; app.SpecWindowSwitch.Layout.Column = 16;
         end
 
         % --- Stats panel (row 2) -------------------------------------------
@@ -795,6 +790,13 @@ classdef AccelDemo < handle
             if app.IsRunning
                 app.initBuffers();
             end
+        end
+
+        function onFigureResize(app)
+            % Scale all font sizes proportionally to window width (reference: 1440 px)
+            w  = app.UIFigure.Position(3);
+            sz = max(9, min(18, round(app.FontSz * w / 1440)));
+            set(findobj(app.UIFigure, '-property', 'FontSize'), 'FontSize', sz);
         end
     end
 end
