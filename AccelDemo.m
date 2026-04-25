@@ -448,8 +448,9 @@ classdef AccelDemo < handle
         function dataCallback(app, src)
             try
                 % Drain ALL buffered scans to prevent accumulation lag
+                if src.NumScansAvailable == 0, return; end
                 raw = read(src, "all", "OutputFormat", "Matrix");
-                if isempty(raw), return; end   % nothing to process
+                if isempty(raw), return; end
 
                 % Calibrate: g = (V - bias) / scaleFactor
                 xg = (raw(:,1) - app.Bias) / app.ScaleFactor;
