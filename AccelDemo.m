@@ -109,6 +109,8 @@ classdef AccelDemo < handle
         TimeLine         % line handle for time-domain plot
         SpectrumLine     % line handle for spectrum plot
         SpectrogramImg   % image handle for spectrogram
+        EqBar            % bar handle for equalizer
+        HistBar          % bar handle for histogram
         HistCallCount = 0  % throttle histogram to ~1 Hz
 
         %--- Histogram axes ---
@@ -542,12 +544,9 @@ classdef AccelDemo < handle
                 newCols = repmat(specCol, 1, colsToAdd);
                 app.SpecBuffer = [app.SpecBuffer(:, colsToAdd+1:end), newCols];
 
-                % ---- Set scalar values before drawnow so they flush together ----
+                % ---- Update all plots then flush once ----
                 app.ShakeGauge.Value = min(rmsVal, 5);
                 app.renderStats(rmsVal, domFreq);
-
-                % ---- Render plots (rate-limited to ~20 fps) ----
-                drawnow limitrate;
                 app.renderTimeDomain();
                 app.renderSpectrum(fv, magv);
                 app.renderSpectrogram();
@@ -556,6 +555,7 @@ classdef AccelDemo < handle
                 if mod(app.HistCallCount, 20) == 0
                     app.renderHistogram();
                 end
+                drawnow limitrate;
 
             catch ME
                 warning('AccelDemo:callback', '%s', ME.message);
@@ -632,12 +632,11 @@ classdef AccelDemo < handle
             ax  = app.EqualizerAxes;
             fLo = max(app.FreqMin, app.LastFv(1));
             fHi = min(app.FreqMax, app.LastFv(end));
-            if fLo >= fHi, cla(ax); return; end
+            if fLo >= fHi, cla(ax); app.EqBar = []; return; end
 
-            % Cap bars to available 1 Hz bins so narrow ranges don't produce empty bars
             availBins = sum(app.LastFv >= fLo & app.LastFv <= fHi);
             nB        = min(app.NumBands, availBins);
-            if nB < 1, cla(ax); return; end
+            if nB < 1, cla(ax); app.EqBar = []; return; end
 
             edges = logspace(log10(fLo), log10(fHi), nB + 1);
 
@@ -649,7 +648,6 @@ classdef AccelDemo < handle
                 end
             end
 
-            % Tick label = geometric centre frequency of each band
             cFreq  = sqrt(edges(1:end-1) .* edges(2:end));
             labels = cell(1, nB);
             for b = 1:nB
@@ -660,25 +658,39 @@ classdef AccelDemo < handle
                 end
             end
 
-            cla(ax);
-            bh = bar(ax, 1:nB, bandAmp, 'FaceColor', 'flat', 'EdgeColor', 'none');
-            bh.CData = app.BandColors(1:nB, :);
-            ax.XLim  = [0.4, nB + 0.6];
-            ax.XTick = 1:nB;
+            if isempty(app.EqBar) || ~isvalid(app.EqBar) || numel(app.EqBar.YData) ~= nB
+                cla(ax);
+                app.EqBar = bar(ax, 1:nB, bandAmp, 'FaceColor', 'flat', 'EdgeColor', 'none');
+                app.EqBar.CData = app.BandColors(1:nB, :);
+                ax.XLim  = [0.4, nB + 0.6];
+                ax.XTick = 1:nB;
+                ax.XTickLabelRotation = 45;
+            else
+                app.EqBar.YData = bandAmp;
+            end
             ax.XTickLabel = labels;
-            ax.XTickLabelRotation = 45;
             app.EqualizerYMax = max(app.EqualizerYMax * 0.97, max(bandAmp) * 1.3);
             ax.YLim = [0, max(app.EqualizerYMax, 1e-4)];
         end
 
         function renderHistogram(app)
-            ax = app.HistAxes;
+            ax   = app.HistAxes;
             data = app.DisplayBuffer;
-            if max(abs(data)) < 1e-6, return; end
-            cla(ax);
-            histogram(ax, data, 60, ...
-                'FaceColor', [0.55 0.35 1.00], 'EdgeColor', 'none', 'Normalization', 'count');
-            ax.XLim = [-max(abs(data))*1.2, max(abs(data))*1.2];
+            pk   = max(abs(data));
+            if pk < 1e-6, return; end
+            rng   = pk * 1.2;
+            edges = linspace(-rng, rng, 62);
+            cnts  = histcounts(data, edges);
+            ctrs  = (edges(1:end-1) + edges(2:end)) * 0.5;
+            if isempty(app.HistBar) || ~isvalid(app.HistBar)
+                cla(ax);
+                app.HistBar = bar(ax, ctrs, cnts, 1, ...
+                    'FaceColor', [0.55 0.35 1.00], 'EdgeColor', 'none');
+            else
+                app.HistBar.XData = ctrs;
+                app.HistBar.YData = cnts;
+            end
+            ax.XLim = [-rng, rng];
         end
 
         function renderStats(app, rmsVal, domFreq)
@@ -716,6 +728,8 @@ classdef AccelDemo < handle
             app.TimeLine         = [];
             app.SpectrumLine     = [];
             app.SpectrogramImg   = [];
+            app.EqBar            = [];
+            app.HistBar          = [];
             app.HistCallCount    = 0;
         end
 
