@@ -5,13 +5,16 @@ classdef AccelDemo < handle
 
     properties (Constant, Access = private)
         FontSz = 13        % ← change this to resize all text in the UI
-        SpectrogramCmap = 'jet'  % ← spectrogram colormap. Common options:
-                                 %   'jet'    – blue→cyan→green→yellow→red (classic)
-                                 %   'turbo'  – improved rainbow, better contrast (R2020b+)
-                                 %   'hot'    – black→red→yellow→white
-                                 %   'parula' – MATLAB default blue→yellow
-                                 %   'cool'   – cyan→magenta
-                                 %   'hsv'    – full hue cycle
+        SpectrogramCmap     = 'jet'  % ← spectrogram colormap. Common options:
+                                     %   'jet'    – blue→cyan→green→yellow→red (classic)
+                                     %   'turbo'  – improved rainbow, better contrast (R2020b+)
+                                     %   'hot'    – black→red→yellow→white
+                                     %   'parula' – MATLAB default blue→yellow
+                                     %   'cool'   – cyan→magenta
+                                     %   'hsv'    – full hue cycle
+        SpectrogramDynRangeDB = 50   % ← colormap dB window (peak - this value = noise floor color)
+                                     %   lower = more contrast, fewer colors on noise
+                                     %   higher = more dynamic range shown
     end
 
     properties (Access = private)
@@ -89,8 +92,9 @@ classdef AccelDemo < handle
                       1.00 0.45 0.10;
                       1.00 0.72 0.00;
                       0.70 0.95 0.10]
-        EqualizerYMax = 0   % decaying peak for Y axis scaling
-        SpectrumYMax  = 0   % decaying peak for spectrum Y axis
+        EqualizerYMax    = 0    % decaying peak for Y axis scaling
+        SpectrumYMax     = 0    % decaying peak for spectrum Y axis
+        SpectrogramPeakDB = -60 % decaying peak dB for CLim top
 
         %--- Spectrum window mode ---
         SpecWindowMode = 'Strip'  % 'Live' = 1s | 'Strip' = full display buffer
@@ -562,13 +566,17 @@ classdef AccelDemo < handle
             mask   = f >= fLo & f <= fHi;
             bufLog = interp1(f(mask), app.SpecBuffer(mask, :), fLog, 'linear', 0);
 
+            dB    = 20*log10(bufLog + 1e-12);
             tAxis = linspace(-app.DisplaySec, 0, app.NumSpecCols);
-            imagesc(app.SpectrogramAxes, tAxis, fLog, 20*log10(bufLog + 1e-12));
+            imagesc(app.SpectrogramAxes, tAxis, fLog, dB);
             ax = app.SpectrogramAxes;
             ax.YDir = 'normal';
             ax.XDir = 'normal';
             ax.XLim = [-app.DisplaySec, 0];
             ax.YLim = [fLo, fHi];
+            % Decaying peak CLim so the full colormap spans [peak-DynRange, peak]
+            app.SpectrogramPeakDB = max(app.SpectrogramPeakDB * 0.98, max(dB, [], 'all'));
+            ax.CLim = [app.SpectrogramPeakDB - app.SpectrogramDynRangeDB, app.SpectrogramPeakDB];
         end
 
         function renderEqualizer(app)
@@ -654,8 +662,9 @@ classdef AccelDemo < handle
             app.TimeVector       = linspace(-app.DisplaySec, 0, N);
             app.PeakHoldSpectrum = [];
             app.SpecBuffer       = [];
-            app.EqualizerYMax    = 0;
-            app.SpectrumYMax     = 0;
+            app.EqualizerYMax     = 0;
+            app.SpectrumYMax      = 0;
+            app.SpectrogramPeakDB = -60;
         end
 
         function refreshButtonStates(app)
