@@ -4,7 +4,7 @@ classdef AccelDemo < handle
 %   Usage: app = AccelDemo();
 
     properties (Constant, Access = private)
-        FontSz = 11        % ← change this to resize all text in the UI
+        FontSz = 13        % ← change this to resize all text in the UI
         SpectrogramCmap = 'jet'  % ← spectrogram colormap. Common options:
                                  %   'jet'    – blue→cyan→green→yellow→red (classic)
                                  %   'turbo'  – improved rainbow, better contrast (R2020b+)
@@ -52,7 +52,7 @@ classdef AccelDemo < handle
 
         %--- Calibration (applied: g = (V - bias) / scaleFactor) ---
         Bias        = 0
-        ScaleFactor = 1
+        ScaleFactor = 0.000902
 
         %--- Acquisition params ---
         SampleRate     = 20000   % Hz
@@ -93,7 +93,7 @@ classdef AccelDemo < handle
         SpectrumYMax  = 0   % decaying peak for spectrum Y axis
 
         %--- Spectrum window mode ---
-        SpecWindowMode = 'Live'   % 'Live' = 1s | 'Strip' = full display buffer
+        SpecWindowMode = 'Strip'  % 'Live' = 1s | 'Strip' = full display buffer
 
         %--- Frequency display range ---
         FreqMin = 5
@@ -213,7 +213,7 @@ classdef AccelDemo < handle
 
             % Scale factor
             app.makeLabel(g, 'Scale (V/g):', 2, 11);
-            app.ScaleFactorEdit = uieditfield(g, 'numeric', 'Value', 1, 'Limits', [1e-6 1e6], ...
+            app.ScaleFactorEdit = uieditfield(g, 'numeric', 'Value', 0.000902, 'Limits', [1e-6 1e6], ...
                 'BackgroundColor', [0.23 0.23 0.32], 'FontColor', 'white', ...
                 'ValueChangedFcn', @(s,~) app.onScaleChanged(s.Value));
             app.ScaleFactorEdit.Layout.Row = 2; app.ScaleFactorEdit.Layout.Column = 12;
@@ -244,7 +244,7 @@ classdef AccelDemo < handle
 
             app.SpecWindowSwitch = uiswitch(g, 'slider', ...
                 'Items', {'Live', 'Strip'}, ...
-                'Value', 'Live', ...
+                'Value', 'Strip', ...
                 'FontColor', [0.78 0.78 0.80], ...
                 'ValueChangedFcn', @(s,~) app.onSpecWindowChanged(s.Value));
             app.SpecWindowSwitch.Layout.Row = 2; app.SpecWindowSwitch.Layout.Column = 16;
