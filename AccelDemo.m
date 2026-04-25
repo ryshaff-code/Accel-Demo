@@ -31,6 +31,7 @@ classdef AccelDemo < handle
         SpecMethodDropdown
         FreqMinEdit
         FreqMaxEdit
+        StripSecEdit
         SpecWindowSwitch
 
         %--- Plots ---
@@ -158,11 +159,11 @@ classdef AccelDemo < handle
                 'BorderType', 'none');
             cp.Layout.Row = 1; cp.Layout.Column = 1;
 
-            g = uigridlayout(cp, [2 17]);
+            g = uigridlayout(cp, [2 20]);
             g.BackgroundColor = [0.17 0.17 0.24];
             g.Padding   = [12 8 12 8];
             g.RowHeight = {'1x','1x'};
-            g.ColumnWidth = {110, 110, 110, 14, 70, 160, 14, 110, 130, 14, 90, 120, 14, 80, 110, 150, '1x'};
+            g.ColumnWidth = {110, 110, 110, 14, 70, 160, 14, 110, 130, 14, 90, 120, 14, 80, 110, 14, 80, 110, 150, '1x'};
             g.RowSpacing    = 4;
             g.ColumnSpacing = 4;
 
@@ -241,18 +242,29 @@ classdef AccelDemo < handle
                 'ValueChangedFcn', @(s,~) app.onFreqMaxChanged(s.Value));
             app.FreqMaxEdit.Layout.Row = 2; app.FreqMaxEdit.Layout.Column = 15;
 
+            % Separator
+            app.makeLabel(g, '', [1 2], 16);
+
+            % Strip chart length
+            app.makeLabel(g, 'Strip (s):', 1, 17);
+            app.StripSecEdit = uieditfield(g, 'numeric', 'Value', app.DisplaySec, ...
+                'Limits', [1 60], ...
+                'BackgroundColor', [0.23 0.23 0.32], 'FontColor', 'white', ...
+                'ValueChangedFcn', @(s,~) app.onStripSecChanged(s.Value));
+            app.StripSecEdit.Layout.Row = 1; app.StripSecEdit.Layout.Column = 18;
+
             % Spectrum window toggle
             swLbl = uilabel(g, 'Text', 'Spectrum Window', ...
                 'FontColor', [0.78 0.78 0.80], 'FontSize', app.FontSz, ...
                 'HorizontalAlignment', 'center');
-            swLbl.Layout.Row = 1; swLbl.Layout.Column = 16;
+            swLbl.Layout.Row = 1; swLbl.Layout.Column = 19;
 
             app.SpecWindowSwitch = uiswitch(g, 'slider', ...
                 'Items', {'Live', 'Strip'}, ...
                 'Value', 'Strip', ...
                 'FontColor', [0.78 0.78 0.80], ...
                 'ValueChangedFcn', @(s,~) app.onSpecWindowChanged(s.Value));
-            app.SpecWindowSwitch.Layout.Row = 2; app.SpecWindowSwitch.Layout.Column = 16;
+            app.SpecWindowSwitch.Layout.Row = 2; app.SpecWindowSwitch.Layout.Column = 19;
         end
 
         % --- Stats panel (row 2) -------------------------------------------
@@ -693,6 +705,7 @@ classdef AccelDemo < handle
             app.StopButton.Enable       = running;
             app.DeviceDropdown.Enable   = ~running;
             app.SampleRateEdit.Enable   = ~running;
+            app.StripSecEdit.Enable     = ~running;
             app.BiasEdit.Enable         = true;   % adjustable live
             app.ScaleFactorEdit.Enable  = true;
         end
@@ -774,6 +787,14 @@ classdef AccelDemo < handle
             app.SpecWindowMode  = val;
             app.PeakHoldSpectrum = [];  % clear peak hold on mode switch
             app.SpectrumYMax     = 0;
+        end
+
+        function onStripSecChanged(app, val)
+            app.DisplaySec = val;
+            app.NumSpecCols = round(val / app.ChunkSec);
+            if app.IsRunning
+                app.initBuffers();
+            end
         end
     end
 end
