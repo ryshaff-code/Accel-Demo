@@ -105,6 +105,12 @@ classdef AccelDemo < handle
         FreqMin = 5
         FreqMax = 10000     % updated to SampleRate/2 on connect
 
+        %--- Plot handles (reused each frame to avoid GC pressure) ---
+        TimeLine         % line handle for time-domain plot
+        SpectrumLine     % line handle for spectrum plot
+        SpectrogramImg   % image handle for spectrogram
+        HistCallCount = 0  % throttle histogram to ~1 Hz
+
         %--- Histogram axes ---
         HistAxes
     end
@@ -135,12 +141,13 @@ classdef AccelDemo < handle
         % ------------------------------------------------------------------
         function buildUI(app)
             app.UIFigure = uifigure( ...
-                'Name',     'Accelerometer Demo  |  NI USB-6363', ...
-                'Position', [80 60 1440 860], ...
-                'Color',    [0.11 0.11 0.16], ...
-                'Visible',  'off', ...
-                'CloseRequestFcn', @(~,~) delete(app), ...
-                'SizeChangedFcn',  @(~,~) app.onFigureResize());
+                'Name',               'Accelerometer Demo  |  NI USB-6363', ...
+                'Position',           [80 60 1440 860], ...
+                'Color',              [0.11 0.11 0.16], ...
+                'Visible',            'off', ...
+                'AutoResizeChildren', 'off', ...
+                'CloseRequestFcn',    @(~,~) delete(app), ...
+                'SizeChangedFcn',     @(~,~) app.onFigureResize());
 
             root = uigridlayout(app.UIFigure, [3 1]);
             root.RowHeight        = {140, 68, '1x'};
@@ -545,7 +552,10 @@ classdef AccelDemo < handle
                 app.renderSpectrum(fv, magv);
                 app.renderSpectrogram();
                 app.renderEqualizer();
-                app.renderHistogram();
+                app.HistCallCount = app.HistCallCount + 1;
+                if mod(app.HistCallCount, 20) == 0
+                    app.renderHistogram();
+                end
 
             catch ME
                 warning('AccelDemo:callback', '%s', ME.message);
@@ -559,20 +569,28 @@ classdef AccelDemo < handle
             ax = app.TimeAxes;
             yl = max(abs(app.DisplayBuffer));
             if yl < 0.001, yl = 0.5; end
-            cla(ax);
-            plot(ax, app.TimeVector, app.DisplayBuffer, ...
-                'Color', [0.25 0.80 1.00], 'LineWidth', 0.9);
-            ax.XLim = [app.TimeVector(1) app.TimeVector(end)];
+            if isempty(app.TimeLine) || ~isvalid(app.TimeLine)
+                cla(ax);
+                app.TimeLine = plot(ax, app.TimeVector, app.DisplayBuffer, ...
+                    'Color', [0.25 0.80 1.00], 'LineWidth', 0.9);
+                yline(ax, 0, 'Color', [0.4 0.4 0.5], 'LineStyle', '--', 'Alpha', 0.5);
+                ax.XLim = [app.TimeVector(1) app.TimeVector(end)];
+            else
+                set(app.TimeLine, 'YData', app.DisplayBuffer);
+            end
             ax.YLim = [-yl*1.25, yl*1.25];
-            yline(ax, 0, 'Color', [0.4 0.4 0.5], 'LineStyle', '--', 'Alpha', 0.5);
         end
 
         function renderSpectrum(app, f, mag)
             ax = app.SpectrumAxes;
-            cla(ax);
-            plot(ax, f, mag, 'Color', [0.25 0.92 0.48], 'LineWidth', 1.3);
+            if isempty(app.SpectrumLine) || ~isvalid(app.SpectrumLine) || ...
+                    numel(app.SpectrumLine.XData) ~= numel(f)
+                cla(ax);
+                app.SpectrumLine = plot(ax, f, mag, 'Color', [0.25 0.92 0.48], 'LineWidth', 1.3);
+            else
+                set(app.SpectrumLine, 'XData', f, 'YData', mag);
+            end
             ax.XLim = [max(app.FreqMin, 1), min(app.FreqMax, app.SampleRate/2)];
-            % Decaying Y max — tracks peak slowly downward
             app.SpectrumYMax = max(app.SpectrumYMax * 0.97, max(mag) * 1.25);
             ax.YLim = [0, max(app.SpectrumYMax, 1e-5)];
         end
@@ -593,13 +611,18 @@ classdef AccelDemo < handle
 
             dB    = 20*log10(bufLog + 1e-12);
             tAxis = linspace(-app.DisplaySec, 0, app.NumSpecCols);
-            imagesc(app.SpectrogramAxes, tAxis, fLog, dB);
             ax = app.SpectrogramAxes;
-            ax.YDir = 'normal';
-            ax.XDir = 'normal';
-            ax.XLim = [-app.DisplaySec, 0];
-            ax.YLim = [fLo, fHi];
-            % Decaying peak CLim so the full colormap spans [peak-DynRange, peak]
+            if isempty(app.SpectrogramImg) || ~isvalid(app.SpectrogramImg)
+                app.SpectrogramImg = imagesc(ax, tAxis, fLog, dB);
+                ax.YDir = 'normal';
+                ax.XDir = 'normal';
+                ax.XLim = [-app.DisplaySec, 0];
+                ax.YLim = [fLo, fHi];
+            else
+                set(app.SpectrogramImg, 'XData', tAxis, 'YData', fLog, 'CData', dB);
+                ax.XLim = [-app.DisplaySec, 0];
+                ax.YLim = [fLo, fHi];
+            end
             app.SpectrogramPeakDB = max(app.SpectrogramPeakDB * 0.98, max(dB, [], 'all'));
             ax.CLim = [app.SpectrogramPeakDB - app.SpectrogramDynRangeDB, app.SpectrogramPeakDB];
         end
@@ -690,6 +713,10 @@ classdef AccelDemo < handle
             app.EqualizerYMax     = 0;
             app.SpectrumYMax      = 0;
             app.SpectrogramPeakDB = -60;
+            app.TimeLine         = [];
+            app.SpectrumLine     = [];
+            app.SpectrogramImg   = [];
+            app.HistCallCount    = 0;
         end
 
         function refreshButtonStates(app)
