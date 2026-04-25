@@ -95,6 +95,7 @@ classdef AccelDemo < handle
         EqualizerYMax    = 0    % decaying peak for Y axis scaling
         SpectrumYMax     = 0    % decaying peak for spectrum Y axis
         SpectrogramPeakDB = -60 % decaying peak dB for CLim top
+        SpecFv           = []   % frequency vector for spectrogram (always live)
 
         %--- Spectrum window mode ---
         SpecWindowMode = 'Strip'  % 'Live' = 1s | 'Strip' = full display buffer
@@ -500,11 +501,26 @@ classdef AccelDemo < handle
                 app.LastFv   = fv;
                 app.LastMagv = magv;
 
+                % ---- Spectrogram always uses live 1s window ----
+                % Spectrum plot + band energizer obey the toggle; spectrogram
+                % always shows the latest second so the waterfall is always crisp.
+                if strcmp(app.SpecWindowMode, 'Strip')
+                    nfftL   = app.SampleRate;
+                    liveWin = app.DisplayBuffer(end-nfftL+1:end);
+                    [pxxL, fL] = pwelch(liveWin, rectwin(nfftL), 0, nfftL, app.SampleRate);
+                    validL   = fL >= 5;
+                    app.SpecFv = fL(validL);
+                    specCol  = sqrt(pxxL(validL));
+                else
+                    app.SpecFv = fv;
+                    specCol  = magv;
+                end
+
                 % ---- Spectrogram columns ----
                 % Advance by as many columns as the received chunk represents so
                 % the waterfall stays in sync with wall clock even when rendering
                 % causes callbacks to fire less frequently than ChunkSec.
-                specCol  = magv(:);
+                specCol  = specCol(:);
                 colsToAdd = max(1, round(n / (app.SampleRate * app.ChunkSec)));
                 if isempty(app.SpecBuffer) || size(app.SpecBuffer,1) ~= numel(specCol)
                     app.SpecBuffer = repmat(specCol, 1, app.NumSpecCols) * 1e-12;
@@ -520,7 +536,7 @@ classdef AccelDemo < handle
                 drawnow limitrate;
                 app.renderTimeDomain();
                 app.renderSpectrum(fv, magv);
-                app.renderSpectrogram(fv);
+                app.renderSpectrogram();
                 app.renderEqualizer();
                 app.renderHistogram();
 
@@ -554,8 +570,9 @@ classdef AccelDemo < handle
             ax.YLim = [0, max(app.SpectrumYMax, 1e-5)];
         end
 
-        function renderSpectrogram(app, f)
-            if isempty(app.SpecBuffer), return; end
+        function renderSpectrogram(app)
+            if isempty(app.SpecBuffer) || isempty(app.SpecFv), return; end
+            f   = app.SpecFv;
             fLo = max(app.FreqMin, f(1));
             fHi = min(app.FreqMax, f(end));
             if fLo >= fHi, return; end
