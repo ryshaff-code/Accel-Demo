@@ -455,14 +455,17 @@ classdef AccelDemo < handle
                 app.DisplayBuffer = [app.DisplayBuffer(n+1:end); xg];
 
                 % ---- Spectrum window selection ----
-                nfft = app.SampleRate;  % 1 Hz bins
+                % nfft = length(winData) → single windowed FFT, no segmentation.
+                % Eliminates pwelch pulsing on impulse inputs. Bin width:
+                %   Strip: SampleRate / (DisplaySec*SampleRate) = 0.2 Hz
+                %   Live:  SampleRate / SampleRate             = 1.0 Hz
                 if strcmp(app.SpecWindowMode, 'Strip')
-                    winData = app.DisplayBuffer;          % full strip chart window
+                    winData = app.DisplayBuffer;
                 else
-                    winData = app.DisplayBuffer(end-nfft+1:end);  % live 1s window
+                    winData = app.DisplayBuffer(end-app.SampleRate+1:end);
                 end
-                noverlap = floor(nfft * 0.5);
-                [pxx, f] = pwelch(winData, hann(nfft), noverlap, nfft, app.SampleRate);
+                nfft     = length(winData);
+                [pxx, f] = pwelch(winData, hann(nfft), 0, nfft, app.SampleRate);
                 mag = sqrt(pxx);  % amplitude spectral density
 
                 % Clip below 5 Hz — avoids AC rolloff artifact at sensor corner frequency
