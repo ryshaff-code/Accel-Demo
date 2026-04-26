@@ -97,6 +97,7 @@ classdef AccelDemo < handle
         SpectrumYMax     = 0    % decaying peak for spectrum Y axis
         SpectrogramPeakDB = -60 % decaying peak dB for CLim top
         SpecFv           = []   % frequency vector for spectrogram (always live)
+        SpecImgNumCols   = 0    % NumSpecCols in effect when SpectrogramImg was created
 
         %--- Spectrum window mode ---
         SpecWindowMode = 'Strip'  % 'Live' = 1s | 'Strip' = full display buffer
@@ -612,12 +613,17 @@ classdef AccelDemo < handle
             dB    = 20*log10(bufLog + 1e-12);
             tAxis = linspace(-app.DisplaySec, 0, app.NumSpecCols);
             ax = app.SpectrogramAxes;
-            if isempty(app.SpectrogramImg) || ~isvalid(app.SpectrogramImg)
+            if isempty(app.SpectrogramImg) || ~isvalid(app.SpectrogramImg) || ...
+                    app.SpecImgNumCols ~= app.NumSpecCols
+                cla(ax);
                 app.SpectrogramImg = imagesc(ax, tAxis, fLog, dB);
-                ax.YDir = 'normal';
-                ax.XDir = 'normal';
-                ax.XLim = [-app.DisplaySec, 0];
-                ax.YLim = [fLo, fHi];
+                ax.YScale = 'log';
+                ax.YDir   = 'normal';
+                ax.XDir   = 'normal';
+                ax.XLim   = [-app.DisplaySec, 0];
+                ax.YLim   = [fLo, fHi];
+                colormap(ax, app.SpectrogramCmap);
+                app.SpecImgNumCols = app.NumSpecCols;
             else
                 set(app.SpectrogramImg, 'XData', tAxis, 'YData', fLog, 'CData', dB);
                 ax.XLim = [-app.DisplaySec, 0];
@@ -717,6 +723,10 @@ classdef AccelDemo < handle
         %  Helpers
         % ------------------------------------------------------------------
         function initBuffers(app)
+            % Derive NumSpecCols from current DisplaySec so the waterfall
+            % time span is always correct without relying on the hardcoded
+            % property default or on onStripSecChanged having fired first.
+            app.NumSpecCols = round(app.DisplaySec / app.ChunkSec);
             N = app.DisplaySec * app.SampleRate;
             app.DisplayBuffer    = zeros(N, 1);
             app.TimeVector       = linspace(-app.DisplaySec, 0, N);
@@ -731,6 +741,7 @@ classdef AccelDemo < handle
             app.EqBar            = [];
             app.HistBar          = [];
             app.HistCallCount    = 0;
+            app.SpecImgNumCols   = 0;
         end
 
         function refreshButtonStates(app)
