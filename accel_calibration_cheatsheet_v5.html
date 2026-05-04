@@ -149,7 +149,7 @@ hr.dv   { border: none; border-top: 1px solid var(--rule); margin: 6px 0; }
         <ul class="bl">
           <li><strong>K2</strong> — scale factor nonlinearity (quadratic term)</li>
           <li><strong>Asymmetry</strong> — K1+ vs K1− at positive and negative g</li>
-          <li><strong>Ki</strong> — anisoelastic / g²-sensitivity under high-g loading</li>
+          <li><strong>Ki</strong> — anisoelastic sensitivity (a_p·a_a cross-product term)</li>
           <li><strong>Cross-axis response</strong> at elevated acceleration levels</li>
           <li>Full-range model validation beyond the ±1g gravity limit</li>
         </ul>
@@ -425,7 +425,7 @@ hr.dv   { border: none; border-top: 1px solid var(--rule); margin: 6px 0; }
         <ul class="bl">
           <li><strong>Index DUT</strong> using sub-table to place input axis radially; verify alignment with theodolite or autocollimator before spin-up</li>
           <li><strong>Multi-g sweep</strong> — run centrifuge at multiple ω settings covering full sensor range and beyond; extract K2 and asymmetry from quadratic fit to residuals after removing K0 and K1</li>
-          <li><strong>Multi-orientation high-g runs</strong> — reindex DUT to multiple orientations to separate Ki (anisoelastic) from K2 geometrically</li>
+          <li><strong>Multi-orientation high-g runs</strong> — reindex DUT to multiple orientations to separate Ki·a_p·a_a (anisoelastic) from K2·a_in² (nonlinearity) geometrically; IA radial vs. tangential is the key orientation pair</li>
           <li><strong>Temperature-soaked centrifuge runs</strong> — for K2 vs. temperature characterization; allow full thermal equilibration before each run; sequential runs preferred over active ramp</li>
         </ul>
       </div>
@@ -460,7 +460,7 @@ hr.dv   { border: none; border-top: 1px solid var(--rule); margin: 6px 0; }
       <span style="color:#fbd38d">K2</span>·a<sub style="font-size:8px">in</sub>² &nbsp;+&nbsp;
       <span style="color:#9ae6b4">Mip</span>·a<sub style="font-size:8px">p</sub> &nbsp;+&nbsp;
       <span style="color:#9ae6b4">Mia</span>·a<sub style="font-size:8px">a</sub> &nbsp;+&nbsp;
-      <span style="color:#fed7d7">Ki</span>·a<sub style="font-size:8px">in</sub>·ω² &nbsp;+&nbsp; ε
+      <span style="color:#fed7d7">Ki</span>·a<sub style="font-size:8px">p</sub>·a<sub style="font-size:8px">a</sub> &nbsp;+&nbsp; ε
     </div>
   </div>
 
@@ -476,7 +476,7 @@ hr.dv   { border: none; border-top: 1px solid var(--rule); margin: 6px 0; }
             <tr><td class="mono">K2</td><td>Nonlinearity</td><td class="val">µg/g²</td><td class="note">Quadratic deviation from ideal linear input-output response</td></tr>
             <tr><td class="mono">Mip</td><td>Cross-Axis (Pendulous)</td><td class="val">µrad</td><td class="note">Sensitivity to acceleration along the pendulous axis; ideally zero</td></tr>
             <tr><td class="mono">Mia</td><td>Cross-Axis (Output)</td><td class="val">µrad</td><td class="note">Sensitivity to acceleration along the output axis; ideally zero</td></tr>
-            <tr><td class="mono">Ki</td><td>Anisoelastic Coef.</td><td class="val">µg/g²</td><td class="note">g²-sensitivity from structural compliance under combined-axis high-g loading</td></tr>
+            <tr><td class="mono">Ki</td><td>Anisoelastic Coef.</td><td class="val">µg/g²</td><td class="note">Cross-axis g²-sensitivity; product of pendulous and output axis accelerations (a_p·a_a); characterized on centrifuge by varying cross-axis loading geometrically</td></tr>
             <tr><td class="mono">ε</td><td>Residual / Noise</td><td class="val">—</td><td class="note">Velocity random walk, quantization noise, vibration rectification error</td></tr>
           </tbody>
         </table>
@@ -497,7 +497,7 @@ hr.dv   { border: none; border-top: 1px solid var(--rule); margin: 6px 0; }
         <ul class="bl">
           <li><strong>Centripetal acceleration:</strong> a = ω²·r &nbsp;|&nbsp; δa/a = 2·δω/ω + δr/r — ω stability is the dominant uncertainty term</li>
           <li><strong>K2 extraction:</strong> Quadratic fit to (V − K0 − K1·a) vs. a²; residual computed relative to the tumble-derived linear model — decouple K0 and K1 first</li>
-          <li><strong>Ki separation:</strong> Run DUT with IA radial vs. tangential; Ki appears only under simultaneous cross-axis loading; geometrically separable from K2</li>
+          <li><strong>Ki separation:</strong> Run DUT with IA radial vs. tangential; Ki·a_p·a_a appears only under simultaneous cross-axis loading — geometrically separable from K2·a_in² by orientation selection</li>
         </ul>
         <hr class="dv">
         <h3>Key Principles</h3>
@@ -542,8 +542,8 @@ hr.dv   { border: none; border-top: 1px solid var(--rule); margin: 6px 0; }
         <tr>
           <td>Ki — Anisoelastic</td>
           <td class="note">Centrifuge</td>
-          <td class="note">High-g loading in multiple DUT orientations; geometrically separable from K2 by orientation selection</td>
-          <td class="note">Sub-table index accuracy determines ability to isolate Ki from K2 — both are g²-class terms</td>
+          <td class="note">Multiple DUT orientations varying a_p·a_a cross-loading; Ki·a_p·a_a separable from K2·a_in² by geometry — IA radial vs. tangential orientations isolate each term</td>
+          <td class="note">Sub-table index accuracy determines ability to isolate Ki from K2 — both are g²-class terms reported in µg/g²</td>
         </tr>
         <tr>
           <td>ε — Noise / ARW</td>
@@ -599,7 +599,7 @@ hr.dv   { border: none; border-top: 1px solid var(--rule); margin: 6px 0; }
         <tr>
           <td>Ki — Anisoelastic</td><td class="val">µg/g²</td>
           <td class="thi">&lt; 1 µg/g²</td><td class="tmd">1–10 µg/g²</td>
-          <td class="treq">Centrifuge with precision sub-table; multiple DUT orientations at high-g to separate Ki from K2 geometrically</td>
+          <td class="treq">Centrifuge with precision sub-table; IA radial vs. tangential orientations separate Ki·a_p·a_a from K2·a_in² — sub-table index accuracy is the limiting factor</td>
           <td class="note">Centrifuge</td>
         </tr>
         <tr>
