@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Nav-Grade Accelerometer Calibration — Equipment Reference</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;600;700&display=swap');
+
+:root {
+  --bg: #f4f2ee;
+  --surface: #fff;
+  --ink: #1a1a1a;
+  --ink-light: #555;
+  --rule: #d0ccc4;
+  --accent: #1a3a5c;
+  --accent2: #b5451b;
+  --tag-bg: #e8e4dd;
+  --mono: 'IBM Plex Mono', monospace;
+  --sans: 'IBM Plex Sans', sans-serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--sans); font-size: 9.5px; line-height: 1.42; color: var(--ink); background: var(--bg); }
+
+.page {
+  width: 8.5in; height: 11in; overflow: hidden;
+  background: var(--surface);
+  padding: 0.36in 0.44in 0.40in;
+  position: relative;
+  margin: 0 auto 0.25in;
+}
+
+/* HEADERS */
+.ph { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2.5px solid var(--accent); padding-bottom: 6px; margin-bottom: 10px; }
+.ph h1 { font-size: 14.5px; font-weight: 700; color: var(--accent); line-height: 1.15; letter-spacing: -0.3px; }
+.ph h2 { font-size: 12.5px; font-weight: 700; color: var(--accent); line-height: 1.15; }
+.ph p  { font-size: 8px; color: var(--ink-light); font-weight: 300; margin-top: 2px; }
+.hr { text-align: right; font-family: var(--mono); font-size: 7px; color: var(--ink-light); line-height: 1.8; white-space: nowrap; }
+
+/* SECTION TITLE */
+.st { font-size: 7px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--accent); background: var(--tag-bg); display: inline-block; padding: 1.5px 6px; margin-bottom: 4px; border-left: 3px solid var(--accent); }
+
+/* LAYOUT */
+.g  { margin-bottom: 9px; }
+.c2 { display: grid; grid-template-columns: 1fr 1fr;     gap: 9px; margin-bottom: 9px; }
+.c3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 9px; }
+.c6040 { display: grid; grid-template-columns: 1.15fr 1fr; gap: 9px; margin-bottom: 9px; }
+
+/* CARD */
+.card { border: 1px solid var(--rule); border-radius: 2px; padding: 6px 8px; }
+.card h3 { font-size: 9px; font-weight: 700; color: var(--accent); border-bottom: 1px solid var(--rule); padding-bottom: 3px; margin-bottom: 5px; }
+
+/* TABLES */
+table { width: 100%; border-collapse: collapse; font-size: 8.5px; }
+thead tr { background: var(--accent); color: white; }
+thead th { padding: 3px 5px; text-align: left; font-weight: 600; font-size: 8px; }
+tbody tr:nth-child(even) { background: #f7f5f1; }
+tbody td { padding: 2.5px 5px; border-bottom: 1px solid #ebe8e3; vertical-align: top; }
+tbody td:first-child { font-weight: 600; color: var(--accent); }
+.val  { font-family: var(--mono); font-size: 8px; }
+.note { font-size: 7.5px; color: var(--ink-light); font-style: italic; }
+.mono { font-family: var(--mono); font-size: 8.5px; font-weight: 600; color: var(--accent); }
+
+/* BULLETS */
+ul.bl { list-style: none; padding: 0; }
+ul.bl li { padding: 2px 0 2px 11px; position: relative; border-bottom: 1px solid #f0ede8; font-size: 8.5px; }
+ul.bl li:last-child { border-bottom: none; }
+ul.bl li::before { content: '▸'; position: absolute; left: 0; color: var(--accent2); font-size: 7px; top: 3px; }
+ul.bl li strong { color: var(--accent); font-weight: 600; }
+
+/* CALLOUTS */
+.warn { background: #fdf6f3; border-left: 3px solid var(--accent2); padding: 4px 7px; font-size: 8px; color: var(--ink); margin-top: 5px; }
+.warn strong { color: var(--accent2); }
+.info { background: #eef2ff; border: 1px solid #c3cfe2; border-left: 3px solid #2b4c8c; border-radius: 2px; padding: 6px 8px; }
+.info h4 { font-size: 8.5px; font-weight: 700; color: #2b4c8c; margin-bottom: 4px; border-bottom: 1px solid #c3cfe2; padding-bottom: 2px; }
+.info ul { list-style: none; padding: 0; }
+.info ul li { padding: 2px 0 2px 10px; position: relative; border-bottom: 1px solid #dce4f0; font-size: 7.5px; }
+.info ul li:last-child { border-bottom: none; }
+.info ul li::before { content: '◆'; position: absolute; left: 0; color: #2b4c8c; font-size: 5.5px; top: 4px; }
+.info ul li strong { color: #2b4c8c; }
+
+/* EQUATIONS */
+.eq { background: var(--accent); color: white; font-family: var(--mono); font-size: 10px; padding: 8px 12px; border-radius: 2px; margin-bottom: 8px; line-height: 1.9; }
+.eqt { background: #2d3748; color: white; font-family: var(--mono); font-size: 9.5px; padding: 8px 12px; border-radius: 2px; margin-bottom: 8px; line-height: 1.9; }
+.eql { font-size: 7px; letter-spacing: 1.3px; text-transform: uppercase; opacity: 0.65; font-family: var(--sans); font-weight: 600; margin-bottom: 2px; }
+
+/* BUDGET */
+.thi  { color: #155724; font-weight: 700; font-family: var(--mono); font-size: 8px; }
+.tmd  { color: #856404; font-weight: 700; font-family: var(--mono); font-size: 8px; }
+.treq { color: var(--accent2); font-size: 7.5px; font-style: italic; }
+.trw  { background: #f0f4ff !important; }
+.trw td:first-child { color: #2b4c8c !important; }
+.tleg { display: flex; gap: 14px; margin-bottom: 5px; font-size: 8px; align-items: center; }
+.td   { display: inline-block; width: 8px; height: 8px; border-radius: 1px; margin-right: 3px; vertical-align: middle; }
+.dhi  { background: #d4edda; border: 1.5px solid #155724; }
+.dmd  { background: #fff3cd; border: 1.5px solid #856404; }
+
+/* MISC */
+.vt     { display: inline-block; background: var(--accent);  color: white; font-family: var(--mono); font-size: 6.5px; padding: 1px 4px; border-radius: 2px; }
+.vt.alt { background: var(--accent2); }
+hr.dv   { border: none; border-top: 1px solid var(--rule); margin: 6px 0; }
+
+/* FOOTER */
+.foot { position: absolute; bottom: 0.28in; left: 0.44in; right: 0.44in; border-top: 1.5px solid var(--accent); padding-top: 4px; display: flex; justify-content: space-between; align-items: center; font-size: 7px; color: var(--ink-light); }
+.foot .bg { display: flex; gap: 5px; }
+.bdg { background: var(--tag-bg); border: 1px solid var(--rule); font-family: var(--mono); font-size: 6.5px; padding: 1.5px 5px; color: var(--accent); font-weight: 600; }
+
+/* ── PAGE 3 TIGHT SPACING ── */
+.p3 { padding-top: 0.30in; font-size: 9px; }
+.p3 table { font-size: 8px; }
+.p3 thead th { font-size: 7.5px; }
+.p3 > div { margin-bottom: 5px !important; }
+.p3 .eq  { margin-bottom: 5px; }
+.p3 tbody td { padding: 1.5px 5px; }
+.p3 .card { padding: 5px 7px; }
+.p3 ul.bl li { padding: 1.5px 0 1.5px 11px; }
+.p3 hr.dv { margin: 4px 0; }
+.p3 .card h3 { margin-bottom: 4px; padding-bottom: 2px; }
+.p3 .tleg { margin-bottom: 3px; }
+.p3 .warn { margin-top: 3px; }
+
+/* PRINT */
+@page { size: 8.5in 11in; margin: 0; }
+@media print {
+  body { background: white; }
+  .page { margin: 0; page-break-after: always; break-after: page; overflow: hidden; max-height: 11in; }
+  .page:last-of-type { page-break-after: avoid; break-after: avoid; margin-bottom: 0; }
+  .foot { position: absolute; bottom: 0.28in; }
+}
+</style>
+</head>
+<body>
+
+<!-- ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓  PAGE 1  ▓▓▓▓ -->
+<!-- Instrument roles · Centrifuge specs · Indexer specs -->
+<div class="page">
+  <div class="ph">
+    <div>
+      <h1>Navigation-Grade Accelerometer<br>Calibration &amp; Characterization — Equipment Reference</h1>
+      <p>Centrifuge &nbsp;·&nbsp; Rate Table / Indexer &nbsp;·&nbsp; Optical Metrology &nbsp;|&nbsp; Specifications, Vendors &amp; Key Considerations</p>
+    </div>
+    <div class="hr">IEEE 836-2009 / IEEE 1293-2018<br>NIST Traceable · ITAR/EAR Applicable</div>
+  </div>
+
+  <div class="g">
+    <div class="st">What Each Instrument Characterizes</div>
+    <div class="c3">
+      <div class="card">
+        <h3>Centrifuge</h3>
+        <ul class="bl">
+          <li><strong>K2</strong> — scale factor nonlinearity (quadratic term)</li>
+          <li><strong>Asymmetry</strong> — K1+ vs K1− at positive and negative g</li>
+          <li><strong>Ki</strong> — anisoelastic / g²-sensitivity under high-g loading</li>
+          <li><strong>Cross-axis response</strong> at elevated acceleration levels</li>
+          <li>Full-range model validation beyond the ±1g gravity limit</li>
+        </ul>
+        <div class="warn"><strong>Note:</strong> Bias (K0) and scale factor (K1) are most accurately determined by static multiposition tumble per IEEE 836 — not centrifuge.</div>
+      </div>
+      <div class="card">
+        <h3>Rate Table / Indexer</h3>
+        <ul class="bl">
+          <li><strong>K0</strong> — bias, the zero-g output offset</li>
+          <li><strong>K1</strong> — scale factor gain accuracy</li>
+          <li><strong>Mip, Mia</strong> — input axis misalignment (pendulous and output axes)</li>
+          <li><strong>Non-orthogonality</strong> — cross-axis sensitivity between sensor axes</li>
+          <li><strong>Thermal coefficients</strong> of all above when paired with a thermal chamber</li>
+        </ul>
+        <div class="warn"><strong>Method:</strong> 6-position minimum or 24-point tumble test. A 2-axis table covers all 3 accelerometer axes in a single setup without repositioning.</div>
+      </div>
+      <div class="card">
+        <h3>Optical Metrology</h3>
+        <ul class="bl">
+          <li><strong>Theodolite:</strong> Table rotation axis vs. local gravity; fixture-to-table angular offset; optical cube face orthogonality verification</li>
+          <li><strong>Autocollimator:</strong> Per-position platen wobble detection; automated high-resolution orientation correction at each index position</li>
+          <li>Decouples <em>fixture misalignment</em> from <em>intrinsic sensor IA misalignment</em></li>
+          <li>Anchors the NIST-traceable orientation reference chain for all calibration data</li>
+        </ul>
+        <div class="warn"><strong>Priority:</strong> Theodolite alone covers setup characterization and fixture/sensor decoupling and is the recommended starting point before adding autocollimator.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="c2">
+    <div>
+      <div class="st">Centrifuge — Key Specifications</div>
+      <div class="card">
+        <table>
+          <thead><tr><th>Parameter</th><th>Target Spec</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>Acceleration Range</td>
+              <td class="val">≥ 2× sensor full scale</td>
+              <td class="note">Must exceed sensor FS to characterize nonlinearity at extremes (e.g. ±50g for a ±20g sensor)</td>
+            </tr>
+            <tr>
+              <td>Angular Velocity Stability</td>
+              <td class="val">≤ 5 ppm</td>
+              <td class="note">ω ripple maps directly to acceleration error: a = ω²r; dominant uncertainty source for K2</td>
+            </tr>
+            <tr>
+              <td>Radius Knowledge</td>
+              <td class="val">≤ 50 ppm</td>
+              <td class="note">δa/a = δr/r + 2δω/ω; thermal expansion of arm must be managed — Invar arms or active temperature monitoring preferred</td>
+            </tr>
+            <tr>
+              <td>Sub-table Index Accuracy</td>
+              <td class="val">≤ 1 arcmin (arc-sec preferred)</td>
+              <td class="note">Positions DUT input axis relative to centripetal acceleration vector; IA misalignment mixes K1 into K2 fit</td>
+            </tr>
+            <tr>
+              <td>Dynamic Balance</td>
+              <td class="val">Verified</td>
+              <td class="note">Arm imbalance introduces cross-axis vibration corrupting sensor data; automated static/dynamic balance preferred</td>
+            </tr>
+            <tr>
+              <td>Standards Compliance</td>
+              <td class="val">IEEE 836-2009</td>
+              <td class="note">MIL-STD-810 if environmental survivability testing also required on the same platform</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div>
+      <div class="st">Rate Table / Indexer — Key Specifications</div>
+      <div class="card">
+        <table>
+          <thead><tr><th>Parameter</th><th>Target Spec</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>Angular Position Accuracy</td>
+              <td class="val">≤ 5 arc-sec (1–2 preferred)</td>
+              <td class="note">Sets the floor on K0/K1 characterization. Request accuracy including wobble and runout — encoder resolution alone is a much more favorable number</td>
+            </tr>
+            <tr>
+              <td>Platen Wobble / Runout</td>
+              <td class="val">Specified separately from encoder</td>
+              <td class="note">Rotating platen tilt introduces a time-varying apparent misalignment that the encoder cannot detect</td>
+            </tr>
+            <tr>
+              <td>Number of Axes</td>
+              <td class="val">2-axis minimum</td>
+              <td class="note">2-axis: all 3 accelerometer axes in one setup; 3-axis: adds arbitrary motion profiles and simultaneous gyro calibration</td>
+            </tr>
+            <tr>
+              <td>Drive Type</td>
+              <td class="val">Direct-drive brushless + optical encoder</td>
+              <td class="note">Eliminates gear lash, backlash, and stiction that corrupt arc-second level position accuracy</td>
+            </tr>
+            <tr>
+              <td>Thermal Chamber</td>
+              <td class="val">Integrated preferred</td>
+              <td class="note">Required for full K0(T) and K1(T) characterization across operating temperature range</td>
+            </tr>
+            <tr>
+              <td>Rotation Mode</td>
+              <td class="val">Slip ring or wire wrap</td>
+              <td class="note">Slip ring: unlimited continuous rotation; wire wrap: lower electrical noise for quasi-static tumble</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="g">
+    <div class="st">Key Procurement &amp; Integration Considerations</div>
+    <div class="c3">
+      <div class="card">
+        <h3>Before You Specify</h3>
+        <ul class="bl">
+          <li><strong>Error budget first</strong> — define allowable calibration uncertainty for each model term before writing equipment specs; tester accuracy should be 1/3–1/5 of sensor allowable error per term (test uncertainty ratio)</li>
+          <li><strong>Encoder accuracy vs. resolution</strong> — always request accuracy including wobble and runout, not just encoder resolution; the two numbers differ significantly</li>
+          <li><strong>Centrifuge arm expansion</strong> — confirm thermal expansion management; Invar arms preferred for sub-100 ppm radius stability across operating temperature</li>
+          <li><strong>Table axis orthogonality</strong> — errors in the table's own axes appear directly as apparent sensor misalignment in multi-axis tumble data reduction</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Facility &amp; Infrastructure</h3>
+        <ul class="bl">
+          <li><strong>Vibration isolation</strong> — both instruments require isolated foundations; centrifuge may need a dedicated safety exclusion zone per facility safety requirements</li>
+          <li><strong>Thermal stability</strong> — ±0.5°C or better for lab environment; air column thermal gradients between autocollimator and optical cube introduce beam steering errors that appear as angular measurement noise</li>
+          <li><strong>Lab sightlines</strong> — plan theodolite and autocollimator positions before finalizing floor layout; install permanent survey monuments (tooling balls or kinematic mounts) for repeatable instrument repositioning</li>
+          <li><strong>Cable pass-through</strong> — confirm slip ring current rating and cable thermal rating for integrated thermal chamber operation</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Compliance &amp; Traceability</h3>
+        <ul class="bl">
+          <li><strong>ITAR/EAR</strong> — navigation-grade test equipment is export-controlled; foreign national access and any hardware export require early compliance review and appropriate licensing</li>
+          <li><strong>NIST traceability</strong> — centrifuge angular velocity and radius, table angular position, and all temperature sensors must have documented calibration chains traceable to NIST</li>
+          <li><strong>Annual calibration</strong> — budget instrument downtime and recalibration cost; theodolite verified via 360° closure checks; autocollimator via NIST-traceable optical polygon</li>
+          <li><strong>Governing standards</strong> — IEEE 836-2009 (centrifuge test procedures), IEEE 1293-2018 (accelerometer test procedures and model equation specification)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="foot">
+    <div class="bg"><span class="bdg">IEEE 836-2009</span><span class="bdg">IEEE 1293-2018</span><span class="bdg">MIL-STD-810</span><span class="bdg">NIST Traceable</span><span class="bdg">ITAR/EAR</span></div>
+    <div>Nav-Grade Accelerometer Calibration Reference &nbsp;·&nbsp; Page 1 of 4 &nbsp;·&nbsp; Internal Use</div>
+  </div>
+</div>
+
+
+<!-- ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓  PAGE 2  ▓▓▓▓ -->
+<!-- Equipment recommendations · Optical metrology detail -->
+<div class="page">
+  <div class="ph">
+    <div>
+      <h2>Equipment Recommendations &amp; Optical Metrology</h2>
+      <p>Vendor Examples &nbsp;·&nbsp; Rate Tables · Centrifuges · Optical Metrology &nbsp;·&nbsp; Theodolite &amp; Autocollimator Integration</p>
+    </div>
+    <div class="hr">IEEE 836-2009 / IEEE 1293-2018<br>NIST Traceable · ITAR/EAR Applicable</div>
+  </div>
+
+  <div class="c2">
+    <div>
+      <div class="st">Equipment Recommendations</div>
+      <div class="card">
+        <h3>Rate Tables / Indexers</h3>
+        <table>
+          <thead><tr><th>Model</th><th>Axes</th><th>Accuracy</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><span class="vt">Ideal Aerosmith</span> 2002P/2002PG</td>
+              <td class="val">2</td><td class="val">±1 arc-sec</td>
+              <td class="note">Top-tier nav-grade; 18–36" platen; slip ring or wire wrap; thermal chamber option; ATL control language; direct-drive brushless motors with precision encoders</td>
+            </tr>
+            <tr>
+              <td><span class="vt">Ideal Aerosmith</span> 1542C-12-TL</td>
+              <td class="val">2</td><td class="val">±8 arc-sec</td>
+              <td class="note">Mid-tier; unlimited rotation on both axes; compact 12" platen; strong price/performance for mid nav-grade programs; same ATL control language</td>
+            </tr>
+            <tr>
+              <td><span class="vt alt">Exail</span> EVO-20 Series</td>
+              <td class="val">2</td><td class="val">Nav-grade class</td>
+              <td class="note">Full range from MEMS production to nav-grade characterization; modular; nGine controller; ProaXe GUI; thermal chamber integration option</td>
+            </tr>
+            <tr>
+              <td><span class="vt alt">Acutronic</span> 2/3-Axis Series</td>
+              <td class="val">2–3</td><td class="val">Customer spec</td>
+              <td class="note">World leader in precision motion simulators; highly configurable; strong defense/aerospace pedigree; custom accuracy tiers available</td>
+            </tr>
+          </tbody>
+        </table>
+        <hr class="dv">
+        <h3>Centrifuges</h3>
+        <table>
+          <thead><tr><th>Model</th><th>g Range</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><span class="vt alt">Exail</span> CTR Series</td>
+              <td class="val">Customer spec</td>
+              <td class="note">IEEE 836-2009 compliant; brushless motors + optical encoders + slip rings; optional climatic chamber, vibration shaker, satellite sub-table; automated static/dynamic balance</td>
+            </tr>
+            <tr>
+              <td><span class="vt">Ideal Aerosmith</span> Centrifuge Series</td>
+              <td class="val">Up to 1,000g / ≤200 lb</td>
+              <td class="note">Broad g range; same ATL control language as Ideal Aerosmith rate tables — simplifies cross-instrument test automation integration; sub-table indexer available</td>
+            </tr>
+          </tbody>
+        </table>
+        <hr class="dv">
+        <h3>Optical Metrology</h3>
+        <table>
+          <thead><tr><th>Instrument</th><th>Vendors / Examples</th><th>Cost</th></tr></thead>
+          <tbody>
+            <tr><td>Geodetic Theodolite</td><td class="note">Leica, Trimble, Sokkia — 1 arc-sec class</td><td class="val">$15–30K</td></tr>
+            <tr><td>Electronic Autocollimator</td><td class="note">Möller-Wedel ELCOMAT 3000, Taylor Hobson, Micro-Radian — 0.1 arc-sec</td><td class="val">$15–40K</td></tr>
+            <tr><td>Precision Optical Cube</td><td class="note">Zygo, Äpre Instruments — specify face orthogonality &lt; 2 arc-sec</td><td class="val">$1–5K</td></tr>
+            <tr><td>Laser Tracker (alt.)</td><td class="note">Leica AT series, FARO — replaces theodolite + some autocollimator functions</td><td class="val">$100K+</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div>
+      <div class="st">Optical Metrology — Role &amp; Integration</div>
+      <div class="card" style="margin-bottom:8px;">
+        <h3>Theodolite — Setup &amp; Periodic Survey</h3>
+        <ul class="bl">
+          <li><strong>Table axis vs. gravity</strong> — establishes rotation axis tilt relative to local vertical; this systematic error aliases uniformly into every tumble position and must be corrected in data reduction</li>
+          <li><strong>Fixture-to-table angular offset</strong> — measures the offset between the optical cube reference frame and the table mechanical frame at the reference index position; recorded as a known correction to separate fixture misalignment from sensor IA misalignment</li>
+          <li><strong>Cube face orthogonality</strong> — verifies manufacturer orthogonality specification under actual lab thermal conditions before relying on the cube as an angular reference</li>
+          <li><strong>Periodic re-survey</strong> — after table maintenance, fixture rebuild, or significant lab thermal event; repositioned to permanent survey monuments for inter-campaign repeatability</li>
+          <li><strong>Recommended starting point</strong> — theodolite alone provides the orientation anchor needed to decouple fixture from sensor IA misalignment without autocollimator investment</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Autocollimator — Per-Position Runtime Monitoring</h3>
+        <ul class="bl">
+          <li><strong>Fixed externally in lab frame</strong> — reads the optical cube riding on the fixture; independent of table encoder, providing a second measurement channel for orientation truth</li>
+          <li><strong>Per-position angle correction</strong> — digital angle output logged at each index position and substituted for nominal encoder angles in the misalignment fit; significantly tightens fit residuals on tables with 10–30 arc-sec encoder accuracy</li>
+          <li><strong>Platen wobble detection</strong> — catches dynamic tilt of the rotating platen that the table encoder cannot observe; important for tables with modest bearing specifications</li>
+          <li><strong>Test automation integration</strong> — electronic autocollimators output RS-232 or USB digital angle data; integrates into automated tumble test sequences without operator intervention at each position</li>
+          <li><strong>Distinction from theodolite</strong> — narrow field, differential, high-resolution (±10–30 arcmin range); the theodolite establishes macro geometry once; the autocollimator monitors it at high resolution during every test run</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="g">
+    <div class="st">Calibration &amp; Characterization Workflow Summary</div>
+    <div class="c3">
+      <div class="card">
+        <h3>Phase 1 — Lab Setup &amp; Geometric Reference</h3>
+        <ul class="bl">
+          <li><strong>Level rate table</strong> using precision electronic tilt sensors (0.1 arc-sec class)</li>
+          <li><strong>Mount optical cube</strong> on fixture co-located with sensor; bond to sensor case reference surface with rigid, thermally stable adhesive</li>
+          <li><strong>Theodolite survey</strong> — establish table rotation axis tilt vs. local vertical; measure cube face orientation relative to table axis; verify cube orthogonality. Record all offsets as fixed corrections for data reduction</li>
+          <li><strong>Install permanent survey monuments</strong> so theodolite can be repositioned consistently between campaigns</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Phase 2 — Static Calibration (Rate Table)</h3>
+        <ul class="bl">
+          <li><strong>6-position or 24-point tumble</strong> — extract K0, K1, Mip, Mia via least-squares fit to gravity projections at known orientations</li>
+          <li><strong>Temperature sweep</strong> — repeat tumble at ≥ 5–10 temperature setpoints; extract K0T, K1T; allow ≥ 30–60 min soak per setpoint; confirm ±0.1°C chamber stability before collection</li>
+          <li><strong>Thermal hysteresis test</strong> — full up/down thermal cycle; record output at T_ref pre- and post-cycle to separate hysteresis from K0T</li>
+          <li><strong>Allan Variance</strong> — stationary DUT at stable temperature; extract bias instability and ARW from log-log plot</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Phase 3 — Dynamic Characterization (Centrifuge)</h3>
+        <ul class="bl">
+          <li><strong>Index DUT</strong> using sub-table to place input axis radially; verify alignment with theodolite or autocollimator before spin-up</li>
+          <li><strong>Multi-g sweep</strong> — run centrifuge at multiple ω settings covering full sensor range and beyond; extract K2 and asymmetry from quadratic fit to residuals after removing K0 and K1</li>
+          <li><strong>Multi-orientation high-g runs</strong> — reindex DUT to multiple orientations to separate Ki (anisoelastic) from K2 geometrically</li>
+          <li><strong>Temperature-soaked centrifuge runs</strong> — for K2 vs. temperature characterization; allow full thermal equilibration before each run; sequential runs preferred over active ramp</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="foot">
+    <div class="bg"><span class="bdg">IEEE 836-2009</span><span class="bdg">IEEE 1293-2018</span><span class="bdg">MIL-STD-810</span><span class="bdg">NIST Traceable</span></div>
+    <div>Nav-Grade Accelerometer Calibration Reference &nbsp;·&nbsp; Page 2 of 4 &nbsp;·&nbsp; Internal Use</div>
+  </div>
+</div>
+
+
+<!-- ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓  PAGE 3  ▓▓▓▓ -->
+<!-- Model equation · Term definitions · Data reduction · Instrument mapping · Error budget -->
+<div class="page p3">
+  <div class="ph">
+    <div>
+      <h2>Sensor Error Model &amp; Error Budget</h2>
+      <p>IEEE 1293-2018 Standard Model &nbsp;·&nbsp; Term Definitions &nbsp;·&nbsp; Instrument Mapping &nbsp;·&nbsp; Nav-Grade Performance Bands</p>
+    </div>
+    <div class="hr">IEEE 1293-2018<br>Q-Flex · VBA · Nav-MEMS</div>
+  </div>
+
+  <div class="g">
+    <div class="st">IEEE 1293 Standard Accelerometer Model Equation</div>
+    <div class="eq">
+      <div class="eql">Standard Form — Linear + Second-Order Terms · Technology-agnostic · Applies to Q-Flex, VBA, and Nav-MEMS sensors · a<sub style="font-size:7px">in</sub> = input axis accel; a<sub style="font-size:7px">p</sub>, a<sub style="font-size:7px">a</sub> = pendulous/output axis accels</div>
+      a<sub style="font-size:8px">out</sub> &nbsp;=&nbsp;
+      <span style="color:#90cdf4">K0</span> &nbsp;+&nbsp;
+      <span style="color:#90cdf4">K1</span>·a<sub style="font-size:8px">in</sub> &nbsp;+&nbsp;
+      <span style="color:#fbd38d">K2</span>·a<sub style="font-size:8px">in</sub>² &nbsp;+&nbsp;
+      <span style="color:#9ae6b4">Mip</span>·a<sub style="font-size:8px">p</sub> &nbsp;+&nbsp;
+      <span style="color:#9ae6b4">Mia</span>·a<sub style="font-size:8px">a</sub> &nbsp;+&nbsp;
+      <span style="color:#fed7d7">Ki</span>·a<sub style="font-size:8px">in</sub>·ω² &nbsp;+&nbsp; ε
+    </div>
+  </div>
+
+  <div class="c2">
+    <div>
+      <div class="st">Model Term Definitions</div>
+      <div class="card">
+        <table>
+          <thead><tr><th>Term</th><th>Name</th><th>Units</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">K0</td><td>Bias</td><td class="val">µg</td><td class="note">Zero-g output offset; drifts with temperature, time, and power cycles</td></tr>
+            <tr><td class="mono">K1</td><td>Scale Factor</td><td class="val">ppm</td><td class="note">Input-to-output gain; ppm error equals % full-scale output error</td></tr>
+            <tr><td class="mono">K2</td><td>Nonlinearity</td><td class="val">µg/g²</td><td class="note">Quadratic deviation from ideal linear input-output response</td></tr>
+            <tr><td class="mono">Mip</td><td>Cross-Axis (Pendulous)</td><td class="val">µrad</td><td class="note">Sensitivity to acceleration along the pendulous axis; ideally zero</td></tr>
+            <tr><td class="mono">Mia</td><td>Cross-Axis (Output)</td><td class="val">µrad</td><td class="note">Sensitivity to acceleration along the output axis; ideally zero</td></tr>
+            <tr><td class="mono">Ki</td><td>Anisoelastic Coef.</td><td class="val">µg/g²</td><td class="note">g²-sensitivity from structural compliance under combined-axis high-g loading</td></tr>
+            <tr><td class="mono">ε</td><td>Residual / Noise</td><td class="val">—</td><td class="note">Velocity random walk, quantization noise, vibration rectification error</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div>
+      <div class="st">Data Reduction — Key Relationships &amp; Notes</div>
+      <div class="card">
+        <h3>Tumble Test (Rate Table)</h3>
+        <ul class="bl">
+          <li><strong>K0 extraction:</strong> K0 = ½(V<sub>+g</sub> + V<sub>−g</sub>) — average of ±g pair; scale factor cancels exactly</li>
+          <li><strong>K1 extraction:</strong> K1 = ½(V<sub>+g</sub> − V<sub>−g</sub>) / g — difference normalized to gravity reference</li>
+          <li><strong>Mip, Mia:</strong> Cross-axis gravity projections at known orientations excite misalignment terms; extracted via least-squares fit across full orientation set</li>
+          <li><strong>Use corrected orientation angles</strong> — substitute theodolite-measured offsets for nominal encoder angles as gravity projection reference; residuals tighten significantly</li>
+        </ul>
+        <hr class="dv">
+        <h3>Centrifuge</h3>
+        <ul class="bl">
+          <li><strong>Centripetal acceleration:</strong> a = ω²·r &nbsp;|&nbsp; δa/a = 2·δω/ω + δr/r — ω stability is the dominant uncertainty term</li>
+          <li><strong>K2 extraction:</strong> Quadratic fit to (V − K0 − K1·a) vs. a²; residual computed relative to the tumble-derived linear model — decouple K0 and K1 first</li>
+          <li><strong>Ki separation:</strong> Run DUT with IA radial vs. tangential; Ki appears only under simultaneous cross-axis loading; geometrically separable from K2</li>
+        </ul>
+        <hr class="dv">
+        <h3>Key Principles</h3>
+        <ul class="bl">
+          <li><strong>Thermal decouple:</strong> Run full ±g pair at each temperature setpoint to extract K0(T) and K1(T) independently; fitting both from a single-axis measurement confounds the two</li>
+          <li><strong>Test uncertainty ratio:</strong> Tester accuracy ≤ 1/3 to 1/5 of sensor allowable error per term; document TUR for each parameter in the calibration record</li>
+          <li><strong>Ellipsoid fitting:</strong> For multi-axis IMU calibration, nonlinear least-squares fit to a 3D ellipsoid simultaneously recovers bias vector, scale factor matrix, and misalignment matrix from multi-position tumble data</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="g">
+    <div class="st">Term → Primary Instrument Mapping</div>
+    <table>
+      <thead><tr><th>Model Term</th><th>Primary Instrument</th><th>Test Method</th><th>Optical Metrology Role</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>K0 — Bias</td>
+          <td class="note">Rate Table + Theodolite</td>
+          <td class="note">6- or 24-point tumble; average of ±g orientations eliminates scale factor</td>
+          <td class="note">Theodolite verifies table axis tilt to gravity — tilt error aliases uniformly into K0 at every position</td>
+        </tr>
+        <tr>
+          <td>K1 — Scale Factor</td>
+          <td class="note">Rate Table / Centrifuge</td>
+          <td class="note">Difference of ±g tumble positions; centrifuge for high-g determination</td>
+          <td class="note">Axis tilt shifts effective gravity projection, biasing K1; centrifuge radius accuracy dominates at high g</td>
+        </tr>
+        <tr>
+          <td>K2 — Nonlinearity</td>
+          <td class="note">Centrifuge</td>
+          <td class="note">Multiple ω settings across full g-range; quadratic fit to residuals after removing K0 and K1</td>
+          <td class="note">Sub-table index accuracy critical — IA misalignment mixes K1 into K2 fit; index error sets K2 floor</td>
+        </tr>
+        <tr>
+          <td>Mip, Mia — Misalignment</td>
+          <td class="note">Rate Table + Theodolite</td>
+          <td class="note">Multi-axis tumble; cross-axis gravity projections excite misalignment terms in the model fit</td>
+          <td class="note">Theodolite critical to separate fixture misalignment from intrinsic sensor IA misalignment</td>
+        </tr>
+        <tr>
+          <td>Ki — Anisoelastic</td>
+          <td class="note">Centrifuge</td>
+          <td class="note">High-g loading in multiple DUT orientations; geometrically separable from K2 by orientation selection</td>
+          <td class="note">Sub-table index accuracy determines ability to isolate Ki from K2 — both are g²-class terms</td>
+        </tr>
+        <tr>
+          <td>ε — Noise / ARW</td>
+          <td class="note">Rate Table (static)</td>
+          <td class="note">Allan Variance on stationary DUT at constant temperature; vibration shaker for VRE characterization</td>
+          <td class="note">Not applicable — noise is a statistical characterization, not geometric</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="g">
+    <div class="st">Tiered Error Budget — Navigation-Grade Performance Bands</div>
+    <div class="tleg">
+      <span><span class="td dhi"></span><strong style="color:#155724">High-End Nav-Grade</strong> — Quartz pendulous (Q-Flex), Vibrating Beam Accelerometer (VBA); bias &lt;10 µg class</span>
+      <span><span class="td dmd"></span><strong style="color:#856404">Mid Nav-Grade</strong> — Precision MEMS, quartz-MEMS hybrid; bias 10–100 µg class</span>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Model Term</th><th>Units</th>
+          <th style="background:#1a4731">High-End Nav</th>
+          <th style="background:#5a3e00">Mid Nav</th>
+          <th>Implied Tester Requirement</th>
+          <th>Primary Instrument</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>K0 — Bias</td><td class="val">µg</td>
+          <td class="thi">&lt; 10 µg</td><td class="tmd">10–100 µg</td>
+          <td class="treq">Table position ≤ 1–2 arc-sec; axis tilt to gravity &lt; 5 arc-sec (theodolite verified)</td>
+          <td class="note">Rate Table + Theodolite</td>
+        </tr>
+        <tr>
+          <td>K1 — Scale Factor</td><td class="val">ppm</td>
+          <td class="thi">&lt; 5 ppm</td><td class="tmd">5–50 ppm</td>
+          <td class="treq">Table position &lt; 1 arc-sec for tumble; centrifuge radius ≤ 50 ppm for high-g determination</td>
+          <td class="note">Rate Table / Centrifuge</td>
+        </tr>
+        <tr>
+          <td>K2 — Nonlinearity</td><td class="val">µg/g²</td>
+          <td class="thi">&lt; 10 µg/g²</td><td class="tmd">10–100 µg/g²</td>
+          <td class="treq">Centrifuge ω stability ≤ 5 ppm; radius knowledge ≤ 50 ppm; sub-table index ≤ 1 arcmin</td>
+          <td class="note">Centrifuge</td>
+        </tr>
+        <tr>
+          <td>Mip, Mia — Misalignment</td><td class="val">µrad</td>
+          <td class="thi">&lt; 10 µrad</td><td class="tmd">10–100 µrad</td>
+          <td class="treq">Table axis orthogonality &lt; 5 arc-sec; theodolite for fixture/sensor decoupling; platen wobble specified separately</td>
+          <td class="note">Rate Table + Theodolite</td>
+        </tr>
+        <tr>
+          <td>Ki — Anisoelastic</td><td class="val">µg/g²</td>
+          <td class="thi">&lt; 1 µg/g²</td><td class="tmd">1–10 µg/g²</td>
+          <td class="treq">Centrifuge with precision sub-table; multiple DUT orientations at high-g to separate Ki from K2 geometrically</td>
+          <td class="note">Centrifuge</td>
+        </tr>
+        <tr>
+          <td>Bias Instability / ARW</td><td class="val">µg / µg/√Hz</td>
+          <td class="thi">&lt; 1 / &lt; 1</td><td class="tmd">1–10 / 1–10</td>
+          <td class="treq">Static rate table; Allan Variance analysis; vibration shaker for VRE characterization; thermally stable and vibration-quiet environment</td>
+          <td class="note">Rate Table (static)</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="foot">
+    <div class="bg"><span class="bdg">IEEE 836-2009</span><span class="bdg">IEEE 1293-2018</span><span class="bdg">MIL-STD-810</span><span class="bdg">NIST Traceable</span></div>
+    <div>Nav-Grade Accelerometer Calibration Reference &nbsp;·&nbsp; Page 3 of 4 &nbsp;·&nbsp; Internal Use</div>
+  </div>
+</div>
+
+
+<!-- ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓  PAGE 4  ▓▓▓▓ -->
+<!-- Thermal model · Term definitions · Test method summary · Chamber specs · Thermal budget -->
+<div class="page">
+  <div class="ph">
+    <div>
+      <h2>Thermal Error Modeling &amp; Characterization</h2>
+      <p>IEEE 1293-2018 Thermal Extensions &nbsp;·&nbsp; Term Definitions &nbsp;·&nbsp; Test Method Summary &nbsp;·&nbsp; Thermal Chamber Specifications &amp; Thermal Error Budget</p>
+    </div>
+    <div class="hr">IEEE 1293-2018<br>MIL-STD-810 · NIST Traceable</div>
+  </div>
+
+  <div class="g">
+    <div class="st">IEEE 1293 Thermal Model Extension</div>
+    <div class="eqt">
+      <div class="eql">Base coefficients expanded as polynomial functions of temperature — first and second order shown; all terms relative to T_ref (cal. reference temperature)</div>
+      <span style="color:#90cdf4">K0</span>(T) = K0<sub style="font-size:8px">0</sub> + <span style="color:#fbd38d">K0T</span>·ΔT + <span style="color:#fbd38d">K0T2</span>·ΔT²
+      &nbsp;&nbsp;&nbsp;<span style="opacity:0.5; font-size:7.5px">[ bias thermal model; ΔT = T − T_ref ]</span><br>
+      <span style="color:#90cdf4">K1</span>(T) = K1<sub style="font-size:8px">0</sub> + <span style="color:#fbd38d">K1T</span>·ΔT + <span style="color:#fbd38d">K1T2</span>·ΔT²
+      &nbsp;&nbsp;&nbsp;<span style="opacity:0.5; font-size:7.5px">[ scale factor thermal model; mismatch between T_ref and operating temperature compounds every other thermal error term ]</span>
+    </div>
+  </div>
+
+  <!-- TERM DEFS (2-col) + TEST METHODS -->
+  <div class="c2" style="margin-bottom:8px;">
+    <div>
+      <div class="st">Thermal Term Definitions</div>
+      <div class="card">
+        <table>
+          <thead><tr><th style="width:50px">Term</th><th style="width:120px">Name</th><th style="width:65px">Units</th><th>Definition &amp; Practical Notes</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">K0T</td><td>Bias Temp. Coef.</td><td class="val">µg/°C</td><td class="note">Linear rate of change of zero-g output with temperature. Dominant thermal error for most nav-grade sensors. Extracted from steady-state soak sweep. Second-order term K0T2 (µg/°C²) captures curvature; needed for ranges &gt; 60°C span.</td></tr>
+            <tr><td class="mono">K1T</td><td>Scale Factor Temp. Coef.</td><td class="val">ppm/°C</td><td class="note">Linear rate of change of gain with temperature. Must be extracted separately from K0T — data reduction decouples the two at each setpoint. Second-order K1T2 (ppm/°C²) significant for ranges &gt; 80°C.</td></tr>
+            <tr><td class="mono">Hys</td><td>Thermal Hysteresis</td><td class="val">µg</td><td class="note">Residual output difference returning to T_ref after a full thermal excursion. Not captured by K0T. Often the largest practical thermal error; caused by stress relief and creep in mounting structures.</td></tr>
+            <tr><td class="mono">S_trans</td><td>Transient Sensitivity</td><td class="val">µg/(°C/min)</td><td class="note">Output error during active temperature ramp, not at steady state. Caused by thermal gradients across sensor body. Requires controlled ramp-rate test; distinct from K0T. Critical for airborne and munition applications.</td></tr>
+            <tr><td class="mono">TOR</td><td>Turn-On Repeatability</td><td class="val">µg (1σ)</td><td class="note">Bias variation across repeated cold-start power cycles at the same temperature. Distinct from in-run bias stability. Driven by stress relaxation and electronics settle. Requires n ≥ 10 cycles.</td></tr>
+            <tr><td class="mono">T_ref</td><td>Cal. Reference Temp.</td><td class="val">°C</td><td class="note">Temperature at which K0₀ and K1₀ are defined. All thermal terms are relative to this point. A mismatch between T_ref and operating temperature compounds every other thermal error. Document explicitly; typically +20°C or +25°C.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div>
+      <div class="st">Thermal Test Method Summary</div>
+      <div class="card" style="margin-bottom:8px;">
+        <table>
+          <thead><tr><th>Term(s)</th><th>Method</th><th>Key Requirement</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>K0T, K1T, K0T2, K1T2</td>
+              <td class="note">Stepped soak sweep — rate table tumble at each setpoint</td>
+              <td class="note">≥ 5–10 setpoints across range; ≥ 30–60 min soak per setpoint; ±0.1°C stability confirmed before data collection</td>
+            </tr>
+            <tr>
+              <td>Thermal Hysteresis (Hys)</td>
+              <td class="note">Full up/down thermal cycle to T_min and T_max, returning to T_ref</td>
+              <td class="note">Soak at each extreme ≥ 2× sensor thermal time constant before reversing; record output at T_ref pre- and post-cycle to isolate from K0T</td>
+            </tr>
+            <tr>
+              <td>Transient Sensitivity (S_trans)</td>
+              <td class="note">Controlled ramp-rate test — sensor operating during active temperature ramp</td>
+              <td class="note">Chamber ramp rate programmable and repeatable (1–5°C/min typical); record output continuously during ramp; normalize error to ramp rate</td>
+            </tr>
+            <tr>
+              <td>Turn-On Repeatability (TOR)</td>
+              <td class="note">Repeated cold-start power cycles at T_min; full cool-down between each</td>
+              <td class="note">n ≥ 10 power cycles; record bias at thermal equilibrium each cycle; report 1σ variation across sample</td>
+            </tr>
+            <tr>
+              <td>K2 Temp. Sensitivity</td>
+              <td class="note">Centrifuge runs at multiple temperature-soaked conditions</td>
+              <td class="note">Full thermal equilibrium required before each centrifuge run; sequential runs preferred over simultaneous centrifuge + active ramp</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="st">Thermal Error Budget</div>
+      <div style="margin-bottom:8px;">
+        <table>
+          <thead>
+            <tr>
+              <th>Term</th><th>Units</th>
+              <th style="background:#1a4731">High-End Nav</th>
+              <th style="background:#5a3e00">Mid Nav</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="trw"><td>K0T</td><td class="val">µg/°C</td><td class="thi">&lt; 1</td><td class="tmd">1–10</td></tr>
+            <tr class="trw"><td>K1T</td><td class="val">ppm/°C</td><td class="thi">&lt; 1</td><td class="tmd">1–10</td></tr>
+            <tr class="trw"><td>Hys</td><td class="val">µg</td><td class="thi">&lt; 5</td><td class="tmd">5–50</td></tr>
+            <tr class="trw"><td>S_trans</td><td class="val">µg/(°C/min)</td><td class="thi">&lt; 1</td><td class="tmd">1–10</td></tr>
+            <tr class="trw"><td>TOR (1σ)</td><td class="val">µg</td><td class="thi">&lt; 5</td><td class="tmd">5–50</td></tr>
+            <tr class="trw"><td>K2 vs. Temp</td><td class="val">µg/g²/°C</td><td class="thi">&lt; 0.5</td><td class="tmd">0.5–5</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="st">Thermal Chamber — Key Specifications</div>
+      <div class="info">
+        <h4>Required for Nav-Grade Thermal Characterization</h4>
+        <ul>
+          <li><strong>Temperature Range:</strong> −55°C to +85°C (mil-range); −40°C to +70°C (most commercial nav-grade)</li>
+          <li><strong>Setpoint Stability:</strong> ±0.1°C or better — stability, not just accuracy; data collection begins only after stability is confirmed</li>
+          <li><strong>Ramp Rate Control:</strong> Programmable 0.5–5°C/min; max rate alone is insufficient — low-rate controllability required for transient sensitivity testing</li>
+          <li><strong>Spatial Uniformity:</strong> ≤ 0.5°C across DUT footprint; gradients drive apparent transient sensitivity even at steady state</li>
+          <li><strong>Rate Table Integration:</strong> Cable pass-through port; confirm cable thermal rating; optical window if autocollimator monitoring during thermal test</li>
+          <li><strong>Soak Time:</strong> ≥ 3–5× sensor thermal time constant; quartz pendulous sensors may require 20–40 min per setpoint</li>
+          <li><strong>NIST Traceability:</strong> Chamber temperature sensor on traceable calibration chain; uncertainty documented in test record</li>
+        </ul>
+      </div>
+      <div class="warn" style="margin-top:6px;">
+        <strong>Pitfall — Hysteresis vs. K0T:</strong> If output at T_ref after a thermal cycle does not match the pre-cycle value, the discrepancy is hysteresis — not temperature coefficient. Always record output at T_ref before and after each excursion to separate the two effects.
+      </div>
+    </div>
+  </div>
+
+  <div class="foot">
+    <div class="bg"><span class="bdg">IEEE 836-2009</span><span class="bdg">IEEE 1293-2018</span><span class="bdg">MIL-STD-810</span><span class="bdg">NIST Traceable</span><span class="bdg">ITAR/EAR</span></div>
+    <div>Nav-Grade Accelerometer Calibration Reference &nbsp;·&nbsp; Page 4 of 4 &nbsp;·&nbsp; Internal Use</div>
+  </div>
+</div>
+
+</body>
+</html>
